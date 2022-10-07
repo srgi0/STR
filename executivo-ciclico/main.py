@@ -4,8 +4,10 @@ class System:
     def __init__(self, *tasks):
         self.tasks = tasks
         self.n_tasks = len(self.tasks)
-        # a partir daqui tudo np.ndarray
         self.tasks_matrix = np.array(self.tasks)
+        self.tasks_names = []
+        for i in range(self.n_tasks):
+            self.tasks_names.append(f'T{i+1}')
         self.tasks_Pi = self.tasks_matrix[:,0]
         self.tasks_Di = self.tasks_matrix[:,1]
         self.tasks_Ci = self.tasks_matrix[:,2]
@@ -22,6 +24,12 @@ class CyclicExecutive:
         self.system = system
         self.major_cycle = 0
         self.minor_cycle = 0
+        self.minor_cycle_selected = 0
+        self.time_line_division = []
+        self.time_line_tasks = []
+        self.n_minor_cycle = 0
+        self.time_line_tasks = 0
+        self.time_line_tasks_priority = []
 
     def calc_major_cycle_mmc (self):
         return np.lcm.reduce(self.system.tasks_Pi)
@@ -70,13 +78,33 @@ class CyclicExecutive:
         self.premise_3()
         self.premise_4()
 
+    def select_minor_cycle (self):
+        if self.minor_cycle.size > 1:
+            print(f'Select Minor Cycle: {self.minor_cycle}')
+            self.minor_cycle_selected = int(input(f'Minor Cycle = '))
+
+    def make_time_line (self):
+        self.n_minor_cycle = int(self.major_cycle/self.minor_cycle_selected)
+        self.time_line_division = np.ones(shape=(self.n_minor_cycle, self.minor_cycle_selected), dtype=str).tolist()
+        
+        self.time_line_tasks_priority = []
+        for i in range(self.system.n_tasks):
+            self.time_line_tasks_priority.append(self.system.tasks_names[np.argsort(self.system.tasks_Pi)[i]])
         
 
 
 if __name__ == '__main__':
     system = System((4,4,1), (5,5,1), (10,10,2))
     system.print_tasks()
+    print(system.tasks_names)
+    print(np.argsort(system.tasks_Pi))
+
+
     cyclic_executive = CyclicExecutive(system)
     cyclic_executive.create()
     print(f'Ciclo Maior é {cyclic_executive.major_cycle}')
     print(f'Opções para Ciclo Menor: {cyclic_executive.minor_cycle}')
+    cyclic_executive.select_minor_cycle()
+    cyclic_executive.make_time_line()
+    print(cyclic_executive.time_line_division)
+    print(cyclic_executive.time_line_tasks_priority)
