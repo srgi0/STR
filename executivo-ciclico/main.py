@@ -17,7 +17,7 @@ class System:
             print(f'Task {task_number}: (P{task_number}, D{task_number}, C{task_number}) = {task}')
 
 
-class CyclicExecutive (System):
+class CyclicExecutive:
     def __init__(self, system):
         self.system = system
         self.major_cycle = 0
