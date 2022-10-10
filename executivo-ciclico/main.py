@@ -93,6 +93,20 @@ class CyclicExecutive:
         
 
 
+        self.time_line = (np.array(self.time_line_division).flatten()).tolist()
+
+        for task in range(self.system.n_tasks):
+            t = task
+            while (t < self.major_cycle):
+                if (self.time_line[t] == '1'):
+                    self.time_line[t] = self.system.tasks_names[task]
+                else:
+                    self.time_line[t] = f'conflict: {self.system.tasks_names[task]} in {self.time_line[t]}'
+                t += self.system.tasks_Pi[task]
+
+        self.time_line = np.reshape(self.time_line, (self.n_minor_cycle,self.minor_cycle_selected))
+        self.time_line = self.time_line.tolist()
+
 if __name__ == '__main__':
     system = System((4,4,1), (5,5,1), (10,10,2))
     system.print_tasks()
@@ -108,3 +122,4 @@ if __name__ == '__main__':
     cyclic_executive.make_time_line()
     print(cyclic_executive.time_line_division)
     print(cyclic_executive.time_line_tasks_priority)
+    print(cyclic_executive.time_line)
