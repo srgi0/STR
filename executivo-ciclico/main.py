@@ -87,31 +87,43 @@ class CyclicExecutive:
         self.n_minor_cycle = int(self.major_cycle/self.minor_cycle_selected)
         self.time_line_division = np.ones(shape=(self.n_minor_cycle, self.minor_cycle_selected), dtype=str).tolist()
         
+
         self.time_line_tasks_priority = []
         for i in range(self.system.n_tasks):
             self.time_line_tasks_priority.append(self.system.tasks_names[np.argsort(self.system.tasks_Pi)[i]])
         
 
-
-        self.time_line = (np.array(self.time_line_division).flatten()).tolist()
-
+        self.time_line = (np.array(self.time_line_division).flatten())
         for task in range(self.system.n_tasks):
-            t = task
+            t = np.where(self.time_line == '1')
+
+            task_name = self.system.tasks_names[task]
+            task_P = self.system.tasks_Pi[task]
+            task_C = self.system.tasks_Ci[task]
             while (t < self.major_cycle):
-                if (self.time_line[t] == '1'):
-                    self.time_line[t] = self.system.tasks_names[task]
+                
+                if (self.time_line[t:t+task_C] == ['1']*task_C):
+                    self.time_line[t:t+task_C] = [task_name]*task_C
                 else:
-                    self.time_line[t] = f'conflict: {self.system.tasks_names[task]} in {self.time_line[t]}'
-                t += self.system.tasks_Pi[task]
+                    break
+                    last_task_name = self.time_line[t]
+                    if (self.time_line[(t+1):(t+1)+task_C] == ['1']*task_C):
+                        self.time_line[t+1] = self.time_line[t]
+                    self.time_line[t:t+task_C] = [task_name]*task_C
+                    
+                t += task_P
 
         self.time_line = np.reshape(self.time_line, (self.n_minor_cycle,self.minor_cycle_selected))
         self.time_line = self.time_line.tolist()
 
 if __name__ == '__main__':
-    system = System((4,4,1), (5,5,1), (10,10,2))
+    T1 = (5, 5, 1)
+    T2 = (6, 6, 2)
+    T3 = (10, 10, 2)
+    T4 = (15, 15, 3)
+    system = System(T1, T2, T3, T4)
     system.print_tasks()
     print(system.tasks_names)
-    print(np.argsort(system.tasks_Pi))
 
 
     cyclic_executive = CyclicExecutive(system)
