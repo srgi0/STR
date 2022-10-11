@@ -68,22 +68,33 @@ class CyclicExecutive:
                 if 2*CM - np.gcd(self.system.tasks_Pi[i], CM) <= self.system.tasks_Di[i] :
                     self.minor_cycle.append(CM)
         self.minor_cycle = np.unique(self.minor_cycle)
-                
+    
+    def select_minor_cycle (self):
+        if self.minor_cycle.size > 1:
+            print(f'Select Minor Cycle: {self.minor_cycle}')
+            self.minor_cycle_selected = int(input(f'Minor Cycle = '))
 
-    def create (self):
+    def calculate (self):
         self.major_cycle = self.calc_major_cycle_mmc()
         self.minor_cycle = self.calc_minor_cycle_mdc()
         self.premise_1()
         self.premise_2()
         self.premise_3()
         self.premise_4()
+        self.select_minor_cycle()
 
-    def select_minor_cycle (self):
-        if self.minor_cycle.size > 1:
-            print(f'Select Minor Cycle: {self.minor_cycle}')
-            self.minor_cycle_selected = int(input(f'Minor Cycle = '))
 
-    def make_time_line (self):
+class TimeLine:
+    def __init__(self, system):
+        self.system = system
+        self.type = type
+    
+    
+
+class TimeLineCE (TimeLine):
+    def __init__(system)
+
+    def make (self):
         self.n_minor_cycle = int(self.major_cycle/self.minor_cycle_selected)
         self.time_line_division = np.ones(shape=(self.n_minor_cycle, self.minor_cycle_selected), dtype=str).tolist()
         
@@ -116,6 +127,10 @@ class CyclicExecutive:
         self.time_line = np.reshape(self.time_line, (self.n_minor_cycle,self.minor_cycle_selected))
         self.time_line = self.time_line.tolist()
 
+
+
+
+
 if __name__ == '__main__':
     T1 = (5, 5, 1)
     T2 = (6, 6, 2)
@@ -127,11 +142,6 @@ if __name__ == '__main__':
 
 
     cyclic_executive = CyclicExecutive(system)
-    cyclic_executive.create()
-    print(f'Ciclo Maior é {cyclic_executive.major_cycle}')
-    print(f'Opções para Ciclo Menor: {cyclic_executive.minor_cycle}')
-    cyclic_executive.select_minor_cycle()
-    cyclic_executive.make_time_line()
-    print(cyclic_executive.time_line_division)
-    print(cyclic_executive.time_line_tasks_priority)
-    print(cyclic_executive.time_line)
+    cyclic_executive.calculate()
+
+    print(type(cyclic_executive))
