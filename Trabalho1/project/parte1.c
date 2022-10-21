@@ -2,6 +2,17 @@
 #include <pthread.h>
 #include <string.h>
 
+int max (int arr[], int len){
+    int max_value = arr[0];
+
+    for (int i = 1; i < len; i++) {
+        if (arr[i] > max_value){
+            max_value = arr[i];
+        }
+    }
+    return max_value;
+}
+
 #define N_TASKS 3
 #define N_LINES N_TASKS+1
 
@@ -12,11 +23,14 @@ int P[N_LINES];
 int C[N_LINES];
 int D[N_LINES];
 
+int system_period;
+
+
 void print_system_matrix (void) {
     printf("--------\n");
     printf("\tP\tC\tD\n");
     for (int j=0; j<N_LINES; j++) {
-        printf("T%d\t%d\t%d\t%d\n", j, P[j], C[j], D[j]);
+        printf("T%d\t%d\t%d\t%d\n", j+1, P[j], C[j], D[j]);
     }
     printf("---------\n\n");
 }
@@ -30,7 +44,17 @@ void DM (void) {
 }
 
 void EDF (void) {
-    printf("Earliest Deadline First\n");
+    printf("->Earliest Deadline First<-\n");
+    printf("------. Escala de Tempo .------\n");
+
+
+    
+    for (int i = 0; i < N_TASKS; i++){
+        printf("T%d ", i+1);
+        for (int j = 0; j < system_period; j++){
+            
+        }
+    }
 }
 
 int read_file (char system_file[]) {
@@ -61,6 +85,9 @@ int read_file (char system_file[]) {
 }
 
 int main(void) {
+    system_period = max(P, sizeof P / sizeof *P);
+
+
     read_file("./sistemas/sistema1.txt");
     printf("%d\n",P[2]);
     
