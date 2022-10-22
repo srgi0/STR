@@ -14,31 +14,43 @@ int max (int arr[], int len){
     return max_value;
 }
 
-#define N_TASKS 3
-#define N_LINES N_TASKS+1
-
-char menu_option[4] = {'0','0','0','0'};
-char system_matrix[N_TASKS][3];
-
-int P[N_LINES];
-int C[N_LINES];
-int D[N_LINES];
-
-int system_period;
-
-float system_utilization () {
-    float system_utilization = 0;
-    for (int i = 0; i < N_TASKS; i++) {
-        system_utilization += C[i]/P[i];
-    }
-}
-
 bool equal (int arr1[], int arr2[], int n) {
     for (int i = 0; i < n; i++){
         if (arr1[i] != arr2[i])
             return false;
     }
     return true;
+}
+
+#define N_TASKS 3
+#define N_LINES N_TASKS+1
+#define EXECUTION_TIME 50
+
+char menu_option[4] = {'0','0','0','0'};
+char system_matrix[N_TASKS][3];
+char execution_time_table[N_TASKS][EXECUTION_TIME];
+
+int P[N_LINES];
+int C[N_LINES];
+int D[N_LINES];
+
+typedef struct task {
+    int p;
+    int c;
+    int d;
+};
+
+typedef struct system {
+    struct task tasks[N_TASKS];
+};
+
+
+
+float system_utilization () {
+    float system_utilization = 0;
+    for (int i = 0; i < N_TASKS; i++) {
+        system_utilization += C[i]/P[i];
+    }
 }
 
 bool scalability_test () {
@@ -69,13 +81,11 @@ void DM (void) {
 void EDF (void) {
     printf("->Earliest Deadline First<-\n");
     printf("------. Escala de Tempo .------\n");
-
-
     
-    for (int i = 0; i < N_TASKS; i++){
-        printf("T%d ", i+1);
-        for (int j = 0; j < system_period; j++){
+    for (int t = 0; t < EXECUTION_TIME; t++) {
+        for (int i = 0; i < N_TASKS; i++) {
             
+            execution_time_table[i][t] = "O";
         }
     }
 }
@@ -108,8 +118,6 @@ int read_file (char system_file[]) {
 }
 
 int main(void) {
-    system_period = max(P, sizeof P / sizeof *P);
-
 
     read_file("./sistemas/sistema1.txt");
     printf("%d\n",P[2]);
