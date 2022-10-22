@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <string.h>
+#include <stdbool.h>
 
 int max (int arr[], int len){
     int max_value = arr[0];
@@ -24,6 +25,28 @@ int C[N_LINES];
 int D[N_LINES];
 
 int system_period;
+
+float system_utilization () {
+    float system_utilization = 0;
+    for (int i = 0; i < N_TASKS; i++) {
+        system_utilization += C[i]/P[i];
+    }
+}
+
+bool equal (int arr1[], int arr2[], int n) {
+    for (int i = 0; i < n; i++){
+        if (arr1[i] != arr2[i])
+            return false;
+    }
+    return true;
+}
+
+bool scalability_test () {
+    float su = system_utilization();
+    if (equal(P, D, N_LINES)) {
+
+    }
+}
 
 
 void print_system_matrix (void) {
