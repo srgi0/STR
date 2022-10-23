@@ -22,50 +22,58 @@ bool equal (int arr1[], int arr2[], int n) {
     return true;
 }
 
+// ------------------------------------------------------------------------------------
+
 #define N_TASKS 3
 #define N_LINES N_TASKS+1
 #define EXECUTION_TIME 50
 
 char menu_option[4] = {'0','0','0','0'};
 char system_matrix[N_TASKS][3];
-char execution_time_table[N_TASKS][EXECUTION_TIME];
 
-int P[N_LINES];
-int C[N_LINES];
-int D[N_LINES];
-
-typedef struct task {
+struct task {
     int p;
     int c;
     int d;
 };
 
-typedef struct system {
+struct system {
     struct task tasks[N_TASKS];
+    char execution_time_table[N_TASKS][EXECUTION_TIME];
 };
 
+struct system system;
 
+
+// -------------------------------------------------------------------------------------
+
+bool p_d_equal () {
+    for (int i = 0; i < N_LINES; i++){
+        if (system.tasks[i].p != system.tasks[i].d)
+            return false;
+    }
+    return true;
+}
 
 float system_utilization () {
     float system_utilization = 0;
     for (int i = 0; i < N_TASKS; i++) {
-        system_utilization += C[i]/P[i];
+        system_utilization += system.tasks[i].c/system.tasks[i].p;
     }
 }
 
 bool scalability_test () {
     float su = system_utilization();
-    if (equal(P, D, N_LINES)) {
+    if (p_d_equal()) {
 
     }
 }
-
 
 void print_system_matrix (void) {
     printf("--------\n");
     printf("\tP\tC\tD\n");
     for (int j=0; j<N_LINES; j++) {
-        printf("T%d\t%d\t%d\t%d\n", j+1, P[j], C[j], D[j]);
+        printf("T%d\t%d\t%d\t%d\n", j+1, system.tasks[j].p, system.tasks[j].c, system.tasks[j].d);
     }
     printf("---------\n\n");
 }
@@ -85,7 +93,7 @@ void EDF (void) {
     for (int t = 0; t < EXECUTION_TIME; t++) {
         for (int i = 0; i < N_TASKS; i++) {
             
-            execution_time_table[i][t] = "O";
+            system.execution_time_table[i][t] = "O";
         }
     }
 }
@@ -117,10 +125,12 @@ int read_file (char system_file[]) {
     return 0;
 }
 
+// -------------------------------------------------------------------------------------
+
 int main(void) {
 
     read_file("./sistemas/sistema1.txt");
-    printf("%d\n",P[2]);
+    printf("%d\n",system.tasks[2].p);
     
     print_system_matrix();
 
