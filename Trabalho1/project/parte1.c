@@ -30,10 +30,8 @@ struct task {
 struct system {
     struct task tasks[N_TASKS];
     char execution_time_table[N_TASKS][EXECUTION_TIME];
-    int tasks_queue[N_TASKS];
-};
-
-struct system system;
+    int tasks_period_queue[N_TASKS];
+} system;
 
 
 // -------------------------------------------------------------------------------------
@@ -63,28 +61,19 @@ bool scalability_test () {
 void print_system_matrix (void) {
     printf("--------\n");
     printf("\tP\tC\tD\n");
-    for (int j = 0; j < N_LINES; j++) {
+    for (int j = 0; j < N_TASKS; j++) {
         printf("T%d\t%d\t%d\t%d\n", j+1, system.tasks[j].p, system.tasks[j].c, system.tasks[j].d);
     }
     printf("---------\n\n");
 }
 
 void rate_monotonic (void) {
-    printf("Rate Monotonic\n");
-
-    int max_value = arr[0];
-
-    for (int i = 1; i < len; i++) {
-        if (arr[i] > max_value){
-            max_value = arr[i];
-        }
-    }
-    return max_value;
+    printf("Rate Monotonic (fixed priority)\n");
     
 
     for (int t = 0; t < EXECUTION_TIME; t++){
         for (int i = 0; i < N_TASKS; i++){
-
+            
         }
     }
 }
@@ -106,12 +95,6 @@ void earliest_deadline_first (void) {
 }
 
 int read_file (char system_file[]) {    
-    FILE *file_ptr = fopen(system_file, "r");
-    if (file_ptr == NULL) {
-        printf("no such file.\n");
-        return 0;
-    }
-    
     /* 
     Assuming that system.txt has content in below format:
         P       C       D
@@ -119,21 +102,35 @@ int read_file (char system_file[]) {
         5       2       5
         20      4       20
     */
+    char buf[256];
+    FILE *file_ptr = fopen(system_file, "r");
+    if (file_ptr == NULL)
+        fprintf(stderr, "cannot open %s\n", system_file);
 
-    for (int i = 0; i < N_LINES; i++){
-        fscanf(file_ptr, "%d %d %d ", &system.tasks[i].p, &system.tasks[i].c, &system.tasks[i].d);
-    }
-
-    /*
-    char save[N_COLS];
-    for (int i = 0; fgets(save, N_COLS, file_ptr) != NULL; i++){
-        for (int j = 0; j < N_COLS; j++){
-            system.tasks[i].p = save[0];
-            system.tasks[i].c = save[1];
-            system.tasks[i].d = save[2];
+    int line = 0;
+    // skip the header line
+    fgets(buf, sizeof buf, file_ptr);
+    line++;
+    // parse the file contents
+    for (int i = 0; i < N_LINES;) {
+        line++;
+        if (!fgets(buf, sizeof buf, file_ptr)) {
+            fprintf(stderr, "%s:%d: missing records\n",
+                    system_file, line);
+            break;
         }
-    }*/
+        if (sscanf(buf, "%d%d%d", &system.tasks[i].p,
+                   &system.tasks[i].c, &system.tasks[i].d) == 3) {
+            i++;
+        } else {
+            fprintf(stderr, "%s:%d: invalid format: %s", 
+                    system_file, line, buf);
+        } 
+    }
+    fclose(file_ptr);
+    //...
     return 0;
+
 }
 
 // -------------------------------------------------------------------------------------
@@ -142,7 +139,7 @@ int main(void) {
 
     read_file("./sistemas/sistema1.txt");
     printf("%d\n",system.tasks[2].p);
-    
+
     print_system_matrix();
 
     char menu_option[4] = {'0','0','0','0'};
