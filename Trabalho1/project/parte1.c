@@ -31,11 +31,15 @@ bool array_equality (int arr1[], int arr2[], int n) {
 
 int bubble_sort (int arr[], int n, int* index[]) {
     int temp;
+    for (int i = 0; i < n ; i++) {
+        *index[i] = i;
+    }
 
     for (int x = 0; x < n-1; x++) {
-        for (int y = 0; y < n-x-1; y++) {
+        for (int y = 0; y < (n-1)-x; y++) {
             if (arr[y] > arr[y+1]) {
                 swap(&arr[y], &arr[y+1]);
+                *index[y] = y;
             }
         }
     }
