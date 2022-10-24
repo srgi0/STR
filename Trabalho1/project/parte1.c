@@ -1,8 +1,9 @@
 #include <stdio.h>
-#include <pthread.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
+//#include "essential.h"
 void swap (int* xp, int* yp) {
     int temp = *xp;
     *xp = *yp;
@@ -20,6 +21,30 @@ int max (int arr[], int len){
     return max_value;
 }
 
+void array_print (int arr[], int n) {
+    printf("[ ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("]\n");
+}
+
+void array_sort_by_idx (int arr[], int idx[], int n) {
+    int temp[n];
+    for (int i = 0; i < n; i++) {
+        temp[i] = arr[idx[i]];
+    }
+    for (int i = 0; i < n; i++) {
+        arr[i] = temp[i];
+    }
+}
+
+bool array_copy (int arr1[], int arr2[], int n) {
+    for (int i = 0; i < n ; i++) {
+        arr2[i] = arr1[i];
+    }
+}
+
 bool array_equality (int arr1[], int arr2[], int n) {
     for (int i = 0; i < n; i++) {
         if (arr1[i] != arr2[i]) {
@@ -29,22 +54,26 @@ bool array_equality (int arr1[], int arr2[], int n) {
     return true;
 }
 
-int bubble_sort (int arr[], int n, int* index[]) {
-    int temp;
-    for (int i = 0; i < n ; i++) {
-        *index[i] = i;
+// returns a pointer (that is like an array)
+int* array_get_idx_sort (int arr[], int n) {
+    int* idx;
+    idx = malloc (sizeof (int) * n);
+
+    for (int i = 0; i < n; i++) {
+        idx[i] = i;
     }
 
-    for (int x = 0; x < n-1; x++) {
-        for (int y = 0; y < (n-1)-x; y++) {
-            if (arr[y] > arr[y+1]) {
-                swap(&arr[y], &arr[y+1]);
-                *index[y] = y;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (arr[idx[i]] > arr[idx[j]]){
+                swap (&idx[i], &idx[j]);
             }
         }
     }
-    return arr;
+
+    return idx;
 }
+
 
 // ------------------------------------------------------------------------------------
 
@@ -67,15 +96,15 @@ struct system {
     char execution_time_table[N_TASKS][EXECUTION_TIME];
 
     float utilization;
-} system;
+} System;
 
 
 // -------------------------------------------------------------------------------------
 
 float system_utilization () {
-    system.utilization = 0;
+    System.utilization = 0;
     for (int i = 0; i < N_TASKS; i++) {
-        system.utilization += system.tasks.c[i]/system.tasks.p[i];
+        System.utilization += System.tasks.c[i]/System.tasks.p[i];
     }
 }
 
@@ -90,7 +119,7 @@ void print_system_matrix (void) {
     printf("--------\n");
     printf("\tP\tC\tD\n");
     for (int j = 0; j < N_TASKS; j++) {
-        printf("T%d\t%d\t%d\t%d\n", j+1, system.tasks.p[j], system.tasks.c[j], system.tasks.d[j]);
+        printf("T%d\t%d\t%d\t%d\n", j+1, System.tasks.p[j], System.tasks.c[j], System.tasks.d[j]);
     }
     printf("---------\n\n");
 }
@@ -117,7 +146,7 @@ void earliest_deadline_first (void) {
     for (int t = 0; t < EXECUTION_TIME; t++) {
         for (int i = 0; i < N_TASKS; i++) {
             
-            //system.execution_time_table[i][t] = "O";
+            //System.execution_time_table[i][t] = "O";
         }
     }
 }
@@ -128,7 +157,7 @@ void print_time_scale (void) {
 
 int read_file (char system_file[]) {    
     /* 
-    Assuming that system.txt has content in below format:
+    Assuming that System.txt has content in below format:
         P       C       D
         4       1       4
         5       2       5
@@ -151,8 +180,8 @@ int read_file (char system_file[]) {
                     system_file, line);
             break;
         }
-        if (sscanf(buf, "%d%d%d", &system.tasks.p[i],
-                   &system.tasks.c[i], &system.tasks.d[i]) == 3) {
+        if (sscanf(buf, "%d%d%d", &System.tasks.p[i],
+                   &System.tasks.c[i], &System.tasks.d[i]) == 3) {
             i++;
         } else {
             fprintf(stderr, "%s:%d: invalid format: %s", 
@@ -172,7 +201,7 @@ void init(char system_file[]) {
     
     // Initializing queue in order [T1, T2, T3, T4, ...]
     for (int i = 0; i < N_TASKS; i++) {
-        system.queue[i] = i;
+        System.queue[i] = i;
     }
 }
 
