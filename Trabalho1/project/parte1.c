@@ -14,6 +14,15 @@ int max (int arr[], int len){
     return max_value;
 }
 
+bool array_equal (int arr1[], int arr2[], int n) {
+    for (int i = 0; i < n; i++) {
+        if (arr1[i] != arr2[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // ------------------------------------------------------------------------------------
 
 #define N_TASKS 3
@@ -21,39 +30,32 @@ int max (int arr[], int len){
 #define N_LINES N_TASKS+1
 #define EXECUTION_TIME 50
 
-struct task {
+struct tasks {
     int p[N_TASKS];
     int c[N_TASKS];
     int d[N_TASKS];
 };
 
 struct system {
-    struct task tasks;
+    struct tasks tasks;
+    int queue[N_TASKS];
     char execution_time_table[N_TASKS][EXECUTION_TIME];
-    int tasks_period_queue[N_TASKS];
+    float utilization;
 } system;
 
 
 // -------------------------------------------------------------------------------------
 
-bool p_d_equal () {
-    for (int i = 0; i < N_LINES; i++){
-        if (system.tasks.p[i] != system.tasks.d[i])
-            return false;
-    }
-    return true;
-}
-
 float system_utilization () {
-    float system_utilization = 0;
+    system.utilization = 0;
     for (int i = 0; i < N_TASKS; i++) {
-        system_utilization += system.tasks.c[i]/system.tasks.p[i];
+        system.utilization += system.tasks.c[i]/system.tasks.p[i];
     }
 }
 
 bool scalability_test () {
     float su = system_utilization();
-    if (p_d_equal()) {
+    if (1) {
 
     }
 }
@@ -79,7 +81,7 @@ void rate_monotonic (void) {
 }
 
 void deadline_monotonic (void) {
-    printf("Deadline Monotonic\n");
+    printf("->Deadline Monotonic<-\n");
 }
 
 void earliest_deadline_first (void) {
@@ -92,6 +94,10 @@ void earliest_deadline_first (void) {
             //system.execution_time_table[i][t] = "O";
         }
     }
+}
+
+void print_time_scale (void) {
+    
 }
 
 int read_file (char system_file[]) {    
@@ -133,13 +139,23 @@ int read_file (char system_file[]) {
 
 }
 
+void init(char system_file[]) {
+    read_file(system_file);
+    
+    print_system_matrix();
+    
+    // Initializing queue in order [T1, T2, T3, T4, ...]
+    for (int i = 0; i < N_TASKS; i++) {
+        system.queue[i] = i;
+    }
+}
+
 // -------------------------------------------------------------------------------------
 
 int main(void) {
 
-    read_file("./sistemas/sistema1.txt");
+    init("./sistemas/sistema1.txt");
 
-    print_system_matrix();
 
     char menu_option[4] = {'0','0','0','0'};
     while (strcmp(menu_option, "exit")) {
