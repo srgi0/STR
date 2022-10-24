@@ -3,6 +3,12 @@
 #include <string.h>
 #include <stdbool.h>
 
+void swap (int* xp, int* yp) {
+    int temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
 int max (int arr[], int len){
     int max_value = arr[0];
 
@@ -14,13 +20,26 @@ int max (int arr[], int len){
     return max_value;
 }
 
-bool array_equal (int arr1[], int arr2[], int n) {
+bool array_equality (int arr1[], int arr2[], int n) {
     for (int i = 0; i < n; i++) {
         if (arr1[i] != arr2[i]) {
             return false;
         }
     }
     return true;
+}
+
+int bubble_sort (int arr[], int n, int* index[]) {
+    int temp;
+
+    for (int x = 0; x < n-1; x++) {
+        for (int y = 0; y < n-x-1; y++) {
+            if (arr[y] > arr[y+1]) {
+                swap(&arr[y], &arr[y+1]);
+            }
+        }
+    }
+    return arr;
 }
 
 // ------------------------------------------------------------------------------------
@@ -38,8 +57,11 @@ struct tasks {
 
 struct system {
     struct tasks tasks;
+    
     int queue[N_TASKS];
+
     char execution_time_table[N_TASKS][EXECUTION_TIME];
+
     float utilization;
 } system;
 
