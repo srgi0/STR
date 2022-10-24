@@ -22,13 +22,13 @@ int max (int arr[], int len){
 #define EXECUTION_TIME 50
 
 struct task {
-    int p;
-    int c;
-    int d;
+    int p[N_TASKS];
+    int c[N_TASKS];
+    int d[N_TASKS];
 };
 
 struct system {
-    struct task tasks[N_TASKS];
+    struct task tasks;
     char execution_time_table[N_TASKS][EXECUTION_TIME];
     int tasks_period_queue[N_TASKS];
 } system;
@@ -38,7 +38,7 @@ struct system {
 
 bool p_d_equal () {
     for (int i = 0; i < N_LINES; i++){
-        if (system.tasks[i].p != system.tasks[i].d)
+        if (system.tasks.p[i] != system.tasks.d[i])
             return false;
     }
     return true;
@@ -47,7 +47,7 @@ bool p_d_equal () {
 float system_utilization () {
     float system_utilization = 0;
     for (int i = 0; i < N_TASKS; i++) {
-        system_utilization += system.tasks[i].c/system.tasks[i].p;
+        system_utilization += system.tasks.c[i]/system.tasks.p[i];
     }
 }
 
@@ -62,7 +62,7 @@ void print_system_matrix (void) {
     printf("--------\n");
     printf("\tP\tC\tD\n");
     for (int j = 0; j < N_TASKS; j++) {
-        printf("T%d\t%d\t%d\t%d\n", j+1, system.tasks[j].p, system.tasks[j].c, system.tasks[j].d);
+        printf("T%d\t%d\t%d\t%d\n", j+1, system.tasks.p[j], system.tasks.c[j], system.tasks.d[j]);
     }
     printf("---------\n\n");
 }
@@ -119,8 +119,8 @@ int read_file (char system_file[]) {
                     system_file, line);
             break;
         }
-        if (sscanf(buf, "%d%d%d", &system.tasks[i].p,
-                   &system.tasks[i].c, &system.tasks[i].d) == 3) {
+        if (sscanf(buf, "%d%d%d", &system.tasks.p[i],
+                   &system.tasks.c[i], &system.tasks.d[i]) == 3) {
             i++;
         } else {
             fprintf(stderr, "%s:%d: invalid format: %s", 
@@ -138,7 +138,6 @@ int read_file (char system_file[]) {
 int main(void) {
 
     read_file("./sistemas/sistema1.txt");
-    printf("%d\n",system.tasks[2].p);
 
     print_system_matrix();
 
