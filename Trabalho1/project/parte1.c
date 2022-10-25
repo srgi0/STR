@@ -12,7 +12,7 @@
 #define N_TASKS 3
 #define N_COLS 3
 #define N_LINES N_TASKS+1
-#define EXECUTION_TIME 50
+#define MAX_EXECUTION_TIME 500
 
 struct tasks {
     char name[N_TASKS][10];
@@ -25,9 +25,10 @@ struct tasks {
 struct system {
     struct tasks tasks;
     
-    int queue_idx[N_TASKS];
+    int queue_idx_identifier[N_TASKS];
 
-    char execution_time_table[N_TASKS][EXECUTION_TIME];
+    int total_execution_time;
+    char execution_time_table[N_TASKS][MAX_EXECUTION_TIME];
 
     float utilization;
 } System;
@@ -62,14 +63,14 @@ void print_system_execution_time_table () {
     printf("Printing Execution Time Table...\n");
     for (int i = 0; i < N_TASKS; i++){
         printf("%s [", System.tasks.name[i]);
-        for (int t = 0; t < EXECUTION_TIME; t++){
+        for (int t = 0; t < System.total_execution_time; t++){
             printf("|%c|", System.execution_time_table[i][t]);
         }
         printf("]\n");
     }
 
     printf(" t (");
-    for (int i = 0; i < EXECUTION_TIME; i++) {
+    for (int i = 0; i < System.total_execution_time; i++) {
         printf("%02d ", i+1);
     }
     printf(")\n");
@@ -78,24 +79,29 @@ void print_system_execution_time_table () {
 void rate_monotonic (void) {
     printf("Rate Monotonic (fixed priority)\n");
 
-    array_copy(array_get_idx_sort(System.tasks.p, N_TASKS), System.queue_idx, N_TASKS);
+    array_copy(array_get_idx_sort(System.tasks.p, N_TASKS), System.queue_idx_identifier, N_TASKS);
 
-    for (int i=0; i<N_TASKS; i++) {
-        for (int t=0; t<EXECUTION_TIME; t++) {
-            if (System.tasks.p[i])
-            for (int c=0; c<System.tasks.c[i]; c++) {
-                System.execution_time_table[i][t] = i+'0';
+    /*
+    System.execution_time_table[0][0] = 'O';
+    System.execution_time_table[1][0] = '-';
+    System.execution_time_table[2][0] = '-';
+    */
+
+    int idx;
+    for (int t=0 ; t<System.total_execution_time ; t++) {
+        idx = 0;
+        for (int i=0 ; i<N_TASKS; i++) {
+            if (i == System.queue_idx_identifier[idx]) {
+                idx++;
+                for (int c=0 ; c<System.tasks.c[i] ; c++){
+                    System.execution_time_table[i][t] = 'O';
+                    t++;
+                }
             }
         }
+        
     }
-
-    for (int t=0 ; t<EXECUTION_TIME ; t++) {
-        int i = 0;
-        int aux;
-        while (i < N_TASKS) {
-            aux = System.tasks.p[System.queue_idx[i]];
-        }
-    }
+    
 
 }
 
@@ -155,6 +161,8 @@ void system_init(char system_file_name[]) {
     char system_file_path[50];
     sprintf(system_file_path, "%s%s", SYSTEM_FOLDER_PATH, system_file_name);
     read_file(system_file_path);
+
+    System.total_execution_time = lcm(System.tasks.p, N_TASKS);
     
 
     print_system_matrix();
@@ -162,12 +170,12 @@ void system_init(char system_file_name[]) {
     
     // Initializing queue in order [T1, T2, T3, T4, ...]
     for (int i = 0; i < N_TASKS; i++) {
-        System.queue[i] = i;
+        System.queue_idx_identifier[i] = i;
     }
 
     // Initializing Execution Time Table filled with '-'
     for (int i=0; i<N_TASKS; i++) {
-        for (int t=0; t<EXECUTION_TIME; t++) {
+        for (int t=0; t<System.total_execution_time; t++) {
             System.execution_time_table[i][t] = '-';
         }
     }

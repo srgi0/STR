@@ -40,7 +40,7 @@ void array_sort_by_idx (int arr[], int idx[], int n) {
     }
 }
 
-bool array_copy (int arr1[], int arr2[], int n) {
+void array_copy (const int arr1[], int arr2[], int n) {
     for (int i = 0; i < n ; i++) {
         arr2[i] = arr1[i];
     }
@@ -66,11 +66,56 @@ int* array_get_idx_sort (int arr[], int n) {
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            if (arr[idx[i]] > arr[idx[j]]){
+            if (arr[idx[i]] < arr[idx[j]]){
                 swap (&idx[i], &idx[j]);
             }
         }
     }
 
     return idx;
+}
+
+void array_multiply (int arr[], int mult, int n) {
+    for (int i=0 ; i<n; i++) {
+        arr[i] *= mult;
+    }
+}
+
+void array_divide (int arr[], int div, int n) {
+    for (int i=0 ; i<n; i++) {
+        if (!(arr[i] % div)) {
+            arr[i] /= div;
+        }
+    }
+}
+
+bool array_all_one (int arr[], int n) {
+    for (int i=0 ; i<n ; i++) {
+        if (arr[i] != 1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int lcm (const int numbers[], int n) {
+    int numbers_cp[n];
+    array_copy(numbers, numbers_cp, n);
+
+    int primo[6] = {2,3,5,7,11,13};
+
+    int lcm = 1;
+
+    int i;
+    for (int aux=0 ; aux < 6; aux++) {
+        for (int i=0 ; i<n && !array_all_one(numbers_cp, n) ; i++) {
+            if ((numbers_cp[i] % primo[aux] == 0)) {
+                lcm *= primo[aux];
+                array_divide(numbers_cp, primo[aux], n);
+                aux = -1;
+            }
+        }
+
+    }
+    return lcm;
 }
