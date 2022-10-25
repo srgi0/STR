@@ -7,6 +7,8 @@
 
 // ------------------------------------------------------------------------------------
 
+#define SYSTEM_FOLDER_PATH  "./sistemas/"
+
 #define N_TASKS 3
 #define N_COLS 3
 #define N_LINES N_TASKS+1
@@ -142,9 +144,8 @@ int read_file (char system_file_path[]) {
 }
 
 void system_init(char system_file_name[]) {
-    char system_folder_path[] = "./sistemas/";
     char system_file_path[50];
-    sprintf(system_file_path, "%s%s", system_folder_path, system_file_name);
+    sprintf(system_file_path, "%s%s", SYSTEM_FOLDER_PATH, system_file_name);
 
     read_file(system_file_path);
     
