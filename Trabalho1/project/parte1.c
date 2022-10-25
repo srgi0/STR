@@ -245,20 +245,19 @@ int main(void) {
         printf("--> ");
         scanf("%s", menu_option);
 
-        if (strcmp(menu_option, "exit")) {
-            if (!strcmp(menu_option, "RM")) {
+        if (!strcmp(menu_option, "RM")) {
             rate_monotonic();
-            } else
-            if (!strcmp(menu_option, "DM")) {
-                deadline_monotonic();
-            } else
-            if (!strcmp(menu_option, "EDF")){
-                earliest_deadline_first();
-            }
-
             print_system_execution_time_table();
-
         } else
+        if (!strcmp(menu_option, "DM")) {
+            deadline_monotonic();
+            print_system_execution_time_table();
+        } else
+        if (!strcmp(menu_option, "EDF")){
+            earliest_deadline_first();
+            print_system_execution_time_table();
+        } 
+        else
         if (!strcmp(menu_option, "exit")){
             printf("Saindo...\n");
         }
