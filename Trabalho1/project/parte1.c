@@ -13,6 +13,8 @@
 #define EXECUTION_TIME 50
 
 struct tasks {
+    char name[N_TASKS][10];
+
     int p[N_TASKS];
     int c[N_TASKS];
     int d[N_TASKS];
@@ -46,18 +48,18 @@ bool scalability_test () {
 }
 
 void print_system_matrix (void) {
-    printf("--------\n");
+    printf("--------------------------\n");
     printf("\tP\tC\tD\n");
     for (int j = 0; j < N_TASKS; j++) {
-        printf("T%d\t%d\t%d\t%d\n", j+1, System.tasks.p[j], System.tasks.c[j], System.tasks.d[j]);
+        printf("%s\t%d\t%d\t%d\n", System.tasks.name[j], System.tasks.p[j], System.tasks.c[j], System.tasks.d[j]);
     }
-    printf("---------\n\n");
+    printf("--------------------------\n\n");
 }
 
 void print_system_execution_time_table () {
     printf("Printing Execution Time Table...\n");
     for (int i = 0; i < N_TASKS; i++){
-        printf("T%d [", i+1);
+        printf("%s [", System.tasks.name[i]);
         for (int t = 0; t < EXECUTION_TIME; t++){
             printf("|%c|", System.execution_time_table[i][t]);
         }
@@ -76,15 +78,15 @@ void rate_monotonic (void) {
 
     array_copy(array_get_idx_sort(System.tasks.p, N_TASKS), System.queue, N_TASKS);
 
-    for (int t = 0; t < EXECUTION_TIME; t++){
-        for (int i = 0; i < N_TASKS; i++){
-            
-            for (int c = 0; c < System.tasks.c[i]; c++) {
-
+    for (int i=0; i<N_TASKS; i++) {
+        for (int t=0; t<EXECUTION_TIME; t++) {
+            if (System.tasks.p[i])
+            for (int c=0; c<System.tasks.c[i]; c++) {
+                System.execution_time_table[i][t] = i+'0';
             }
-            System.execution_time_table[i][t] = '-';
         }
     }
+
 }
 
 void deadline_monotonic (void) {
@@ -95,16 +97,11 @@ void earliest_deadline_first (void) {
     printf("->Earliest Deadline First<-\n");
     printf("------. Escala de Tempo .------\n");
     
-    for (int t = 0; t < EXECUTION_TIME; t++) {
-        for (int i = 0; i < N_TASKS; i++) {
-            
-            //System.execution_time_table[i][t] = "O";
-        }
-    }
+    
 }
 
 
-int read_file (char system_file[]) {    
+int read_file (char system_file_path[]) {    
     /* 
     Assuming that System.txt has content in below format:
         P       C       D
@@ -113,9 +110,9 @@ int read_file (char system_file[]) {
         20      4       20
     */
     char buf[256];
-    FILE *file_ptr = fopen(system_file, "r");
+    FILE *file_ptr = fopen(system_file_path, "r");
     if (file_ptr == NULL)
-        fprintf(stderr, "cannot open %s\n", system_file);
+        fprintf(stderr, "cannot open %s\n", system_file_path);
 
     int line = 0;
     // skip the header line
@@ -126,15 +123,16 @@ int read_file (char system_file[]) {
         line++;
         if (!fgets(buf, sizeof buf, file_ptr)) {
             fprintf(stderr, "%s:%d: missing records\n",
-                    system_file, line);
+                    system_file_path, line);
             break;
         }
         if (sscanf(buf, "%d%d%d", &System.tasks.p[i],
                    &System.tasks.c[i], &System.tasks.d[i]) == 3) {
+            sprintf(System.tasks.name[i], "T%d", i);
             i++;
         } else {
             fprintf(stderr, "%s:%d: invalid format: %s", 
-                    system_file, line, buf);
+                    system_file_path, line, buf);
         } 
     }
     fclose(file_ptr);
@@ -143,8 +141,12 @@ int read_file (char system_file[]) {
 
 }
 
-void init(char system_file[]) {
-    read_file(system_file);
+void system_init(char system_file_name[]) {
+    char system_folder_path[] = "./sistemas/";
+    char system_file_path[50];
+    sprintf(system_file_path, "%s%s", system_folder_path, system_file_name);
+
+    read_file(system_file_path);
     
     print_system_matrix();
     
@@ -152,13 +154,19 @@ void init(char system_file[]) {
     for (int i = 0; i < N_TASKS; i++) {
         System.queue[i] = i;
     }
+
+    for (int i=0; i<N_TASKS; i++) {
+        for (int t=0; t<EXECUTION_TIME; t++) {
+            System.execution_time_table[i][t] = '-';
+        }
+    }
+    print_system_execution_time_table();
 }
 
 // -------------------------------------------------------------------------------------
 
-int main(void) {
-
-    init("./sistemas/sistema1.txt");
+int main(int argc, char *argv[]) {
+    system_init(argv[1]);
 
 
     char menu_option[4] = {'0','0','0','0'};
