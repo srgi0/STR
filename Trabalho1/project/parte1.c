@@ -124,13 +124,35 @@ void print_system_matrix (void) {
     printf("---------\n\n");
 }
 
+void print_system_execution_time_table () {
+    printf("Printing Execution Time Table...\n");
+    for (int i = 0; i < N_TASKS; i++){
+        printf("T%d [", i+1);
+        for (int t = 0; t < EXECUTION_TIME; t++){
+            printf("|%c|", System.execution_time_table[i][t]);
+        }
+        printf("]\n");
+    }
+
+    printf(" t (");
+    for (int i = 0; i < EXECUTION_TIME; i++) {
+        printf("%02d ", i+1);
+    }
+    printf(")\n");
+}
+
 void rate_monotonic (void) {
     printf("Rate Monotonic (fixed priority)\n");
-    
+
+    array_copy(array_get_idx_sort(System.tasks.p, N_TASKS), System.queue, N_TASKS);
 
     for (int t = 0; t < EXECUTION_TIME; t++){
         for (int i = 0; i < N_TASKS; i++){
             
+            for (int c = 0; c < System.tasks.c[i]; c++) {
+
+            }
+            System.execution_time_table[i][t] = '-';
         }
     }
 }
@@ -223,14 +245,19 @@ int main(void) {
         printf("--> ");
         scanf("%s", menu_option);
 
-        if (!strcmp(menu_option, "RM")) {
+        if (strcmp(menu_option, "exit")) {
+            if (!strcmp(menu_option, "RM")) {
             rate_monotonic();
-        } else
-        if (!strcmp(menu_option, "DM")) {
-            deadline_monotonic();
-        } else
-        if (!strcmp(menu_option, "EDF")){
-            earliest_deadline_first();
+            } else
+            if (!strcmp(menu_option, "DM")) {
+                deadline_monotonic();
+            } else
+            if (!strcmp(menu_option, "EDF")){
+                earliest_deadline_first();
+            }
+
+            print_system_execution_time_table();
+
         } else
         if (!strcmp(menu_option, "exit")){
             printf("Saindo...\n");
