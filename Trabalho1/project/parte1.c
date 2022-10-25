@@ -25,7 +25,7 @@ struct tasks {
 struct system {
     struct tasks tasks;
     
-    int queue[N_TASKS];
+    int queue_idx[N_TASKS];
 
     char execution_time_table[N_TASKS][EXECUTION_TIME];
 
@@ -78,7 +78,7 @@ void print_system_execution_time_table () {
 void rate_monotonic (void) {
     printf("Rate Monotonic (fixed priority)\n");
 
-    array_copy(array_get_idx_sort(System.tasks.p, N_TASKS), System.queue, N_TASKS);
+    array_copy(array_get_idx_sort(System.tasks.p, N_TASKS), System.queue_idx, N_TASKS);
 
     for (int i=0; i<N_TASKS; i++) {
         for (int t=0; t<EXECUTION_TIME; t++) {
@@ -86,6 +86,14 @@ void rate_monotonic (void) {
             for (int c=0; c<System.tasks.c[i]; c++) {
                 System.execution_time_table[i][t] = i+'0';
             }
+        }
+    }
+
+    for (int t=0 ; t<EXECUTION_TIME ; t++) {
+        int i = 0;
+        int aux;
+        while (i < N_TASKS) {
+            aux = System.tasks.p[System.queue_idx[i]];
         }
     }
 
@@ -146,16 +154,18 @@ int read_file (char system_file_path[]) {
 void system_init(char system_file_name[]) {
     char system_file_path[50];
     sprintf(system_file_path, "%s%s", SYSTEM_FOLDER_PATH, system_file_name);
-
     read_file(system_file_path);
     
+
     print_system_matrix();
+
     
     // Initializing queue in order [T1, T2, T3, T4, ...]
     for (int i = 0; i < N_TASKS; i++) {
         System.queue[i] = i;
     }
 
+    // Initializing Execution Time Table filled with '-'
     for (int i=0; i<N_TASKS; i++) {
         for (int t=0; t<EXECUTION_TIME; t++) {
             System.execution_time_table[i][t] = '-';
