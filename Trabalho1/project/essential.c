@@ -74,29 +74,3 @@ int* array_get_idx_sort (int arr[], int n) {
 
     return idx;
 }
-
-/*
-#define N 5
-int main() {
-    int array[N] = {5,7,1,0,4};
-    int array_cp[N];
-    
-    array_copy(array, array_cp, N);
-    
-    array_print(array, N);
-    array_print(array_cp, N);
-
-    
-    int* array_idx_srt;
-    array_idx_srt = array_get_idx_sort(array_cp, N);
-    array_sort_by_idx(array_cp, array_idx_srt, N);
-
-    array_print(array_idx_srt, N);
-    array_print(array_cp, N);
-
-
-
-
-
-return(0);
-}*/
