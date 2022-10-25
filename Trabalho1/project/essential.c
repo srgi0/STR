@@ -11,7 +11,7 @@ void swap (int* xp, int* yp) {
     *yp = temp;
 }
 
-int max (int arr[], int len){
+int array_max (int arr[], int len){
     int max_value = arr[0];
 
     for (int i = 1; i < len; i++) {

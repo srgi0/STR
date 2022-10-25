@@ -101,6 +101,10 @@ void rate_monotonic (void) {
         }
         
     }
+
+    for (int t=0 ; t<System.total_execution_time ; t++) {
+
+    }
     
 
 }
@@ -162,7 +166,8 @@ void system_init(char system_file_name[]) {
     sprintf(system_file_path, "%s%s", SYSTEM_FOLDER_PATH, system_file_name);
     read_file(system_file_path);
 
-    System.total_execution_time = lcm(System.tasks.p, N_TASKS);
+    //System.total_execution_time = lcm(System.tasks.p, N_TASKS);
+    System.total_execution_time = array_max(System.tasks.d, N_TASKS);
     
 
     print_system_matrix();

@@ -3,7 +3,7 @@
 
 extern void swap (int* xp, int* yp);
 
-extern int max (int arr[], int len);
+extern int array_max (int arr[], int len);
 
 extern void array_print (int arr[], int n);
 
