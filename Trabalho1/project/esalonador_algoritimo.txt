@@ -1,0 +1,20 @@
+# Earliest Deadline First
+
+- Inversamente proporcional ao Deadline absoluto
+
+
+# Geral
+
+1.  todas as tarefas entrarm na fila de espera;
+
+2.  ordena-se a fila de espera de acordo com o critério de prioridade;
+
+3.  (percorre a linha de tempo) para cada *t* in *linha de tempo*:
+    verificar o próximo da fila e colocar 'O' na posição do primeiro da
+    fila;
+4.  ordena-se a fila de espera de acordo com o critério de prioridade;
+    4.1 a depender do numero de tempo de execução, a tarefa voltará ou
+    não para a fila; (executa isso todo loop do *t*)
+
+5.  quando passar o periodo de alguma tarefa ao percorrer *t* in *linha
+    de tempo*, a tarefa volta para a fila

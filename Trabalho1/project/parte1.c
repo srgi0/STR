@@ -14,18 +14,23 @@
 #define N_LINES N_TASKS+1
 #define MAX_EXECUTION_TIME 500
 
+#define QUEUE_OPENING 0
+
 struct tasks {
     char name[N_TASKS][10];
 
     int p[N_TASKS];
     int c[N_TASKS];
     int d[N_TASKS];
+
+    int remaining_c[N_TASKS];
+    int absolute_d[];
 };
 
 struct system {
     struct tasks tasks;
     
-    int queue_idx_identifier[N_TASKS];
+    int queue_task_idx_identifier[N_TASKS];
 
     int total_execution_time;
     char execution_time_table[N_TASKS][MAX_EXECUTION_TIME];
@@ -36,7 +41,7 @@ struct system {
 
 // -------------------------------------------------------------------------------------
 
-float system_utilization () {
+void calc_system_utilization () {
     System.utilization = 0;
     for (int i = 0; i < N_TASKS; i++) {
         System.utilization += System.tasks.c[i]/System.tasks.p[i];
@@ -44,7 +49,7 @@ float system_utilization () {
 }
 
 bool scalability_test () {
-    float su = system_utilization();
+    float su = System.utilization;
     if (1) {
 
     }
@@ -79,7 +84,7 @@ void print_system_execution_time_table () {
 void rate_monotonic (void) {
     printf("Rate Monotonic (fixed priority)\n");
 
-    array_copy(array_get_idx_sort(System.tasks.p, N_TASKS), System.queue_idx_identifier, N_TASKS);
+    array_copy(array_get_idx_sort(System.tasks.p, N_TASKS), System.queue_task_idx_identifier, N_TASKS);
 
     /*
     System.execution_time_table[0][0] = 'O';
@@ -91,7 +96,7 @@ void rate_monotonic (void) {
     for (int t=0 ; t<System.total_execution_time ; t++) {
         idx = 0;
         for (int i=0 ; i<N_TASKS; i++) {
-            if (i == System.queue_idx_identifier[idx]) {
+            if (i == System.queue_task_idx_identifier[idx]) {
                 idx++;
                 for (int c=0 ; c<System.tasks.c[i] ; c++){
                     System.execution_time_table[i][t] = 'O';
@@ -109,13 +114,41 @@ void rate_monotonic (void) {
 
 }
 
+void escalonador (void) {
+    // Initializing queue with T0, T1, T2, ... order
+    for (int i=0 ; i<N_TASKS; i++) {
+        System.queue_task_idx_identifier[i] = i;
+    }
+
+    // Initializing tasks remaining runtime (real time c)
+    for (int i=0 ; i<N_TASKS ; i++) {
+        System.tasks.remaining_c[i] = System.tasks.c[i];
+    }
+
+    // 2. criterio de prioridade para a fila
+
+    
+    int task_idx;
+    for (int t=0; t<System.total_execution_time ; t++) {
+        task_idx = System.queue_task_idx_identifier[QUEUE_OPENING];
+        if (System.tasks.remaining_c[task_idx] != 0) {
+            System.execution_time_table[task_idx][t] = 'O';
+            System.tasks.remaining_c[task_idx] -= 1;
+        }
+        
+    }
+}
+
 void deadline_monotonic (void) {
     printf("->Deadline Monotonic<-\n");
 }
 
 void earliest_deadline_first (void) {
     printf("->Earliest Deadline First<-\n");
-    printf("------. Escala de Tempo .------\n");
+
+    
+    
+
     
     
 }
@@ -166,6 +199,8 @@ void system_init(char system_file_name[]) {
     sprintf(system_file_path, "%s%s", SYSTEM_FOLDER_PATH, system_file_name);
     read_file(system_file_path);
 
+    calc_system_utilization();
+
     //System.total_execution_time = lcm(System.tasks.p, N_TASKS);
     System.total_execution_time = array_max(System.tasks.d, N_TASKS);
     
@@ -175,7 +210,7 @@ void system_init(char system_file_name[]) {
     
     // Initializing queue in order [T1, T2, T3, T4, ...]
     for (int i = 0; i < N_TASKS; i++) {
-        System.queue_idx_identifier[i] = i;
+        System.queue_task_idx_identifier[i] = i;
     }
 
     // Initializing Execution Time Table filled with '-'
