@@ -36,7 +36,7 @@ ordena_pelo_criterio () {
 }
 
 if (!(t % periodo[index tarefa])) {
-
+    
 }
 
 1.  todas as tarefas entram na fila de espera (queue);
