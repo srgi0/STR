@@ -119,3 +119,21 @@ int lcm (const int numbers[], int n) {
     }
     return lcm;
 }
+
+void array_shift (int arr[], int n, int shift) {
+    if (shift >= 0) {
+        for (int s=0; s<shift ; s++) {
+            for (int i=(n-1) ; i>0; i--) {
+                swap(&arr[i], &arr[i-1]);
+            }
+        }
+    }
+    else {
+        for (int s=0; s<abs(shift) ; s++) {
+            for (int i=0 ; i<n-1; i++) {
+                swap(&arr[i], &arr[i+1]);
+            }
+        }
+    }
+    
+}

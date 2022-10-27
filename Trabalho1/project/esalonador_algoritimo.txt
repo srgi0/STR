@@ -18,3 +18,30 @@
 
 5.  quando passar o periodo de alguma tarefa ao percorrer *t* in *linha
     de tempo*, a tarefa volta para a fila
+
+
+
+# Geral
+
+    - existe uma fila;
+    - existem tarefas;
+    - existe tempo de execução de cada tarfa;
+    - existe o tempo de execução remanescente de uma tarefa (tempo real);
+    - existe o período de cada tarefa;
+    - existe a tabela de tempo de execução, onde em cada coluna somente
+        somente pode haver uma tarefa por vez;
+
+ordena_pelo_criterio () {
+    
+}
+
+if (!(t % periodo[index tarefa])) {
+
+}
+
+1.  todas as tarefas entram na fila de espera (queue);
+    while percorrendo 
+        2.  ordena-se a fila de espera de acordo com o criterio de prioridade;
+        3.  pega a tarefa que está na saída da fila e coloca um sinal de
+            execução ('O') na coordenada [index da tarefa][t]
+        4. tempo_remanescente[index da tarefa]--;

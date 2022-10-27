@@ -18,6 +18,6 @@ extern int* array_get_idx_sort (int arr[], int n);
 
 int lcm (const int numbers[], int n);
 
-
+void array_shift (int arr[], int n, int shift);
 
 #endif

@@ -15,6 +15,7 @@
 #define MAX_EXECUTION_TIME 500
 
 #define QUEUE_OPENING 0
+#define QUEUE_LAST N_TASKS
 
 struct tasks {
     char name[N_TASKS][10];
@@ -64,6 +65,14 @@ void print_system_matrix (void) {
     printf("--------------------------\n\n");
 }
 
+void set_execution_time_table () {
+    for (int i=0; i<N_TASKS; i++) {
+        for (int t=0; t<System.total_execution_time; t++) {
+            System.execution_time_table[i][t] = '-';
+        }
+    }
+}
+
 void print_system_execution_time_table () {
     printf("Printing Execution Time Table...\n");
     for (int i = 0; i < N_TASKS; i++){
@@ -81,77 +90,78 @@ void print_system_execution_time_table () {
     printf(")\n");
 }
 
-void rate_monotonic (void) {
-    printf("Rate Monotonic (fixed priority)\n");
-
-    array_copy(array_get_idx_sort(System.tasks.p, N_TASKS), System.queue_task_idx_identifier, N_TASKS);
-
-    /*
-    System.execution_time_table[0][0] = 'O';
-    System.execution_time_table[1][0] = '-';
-    System.execution_time_table[2][0] = '-';
-    */
-
-    int idx;
-    for (int t=0 ; t<System.total_execution_time ; t++) {
-        idx = 0;
-        for (int i=0 ; i<N_TASKS; i++) {
-            if (i == System.queue_task_idx_identifier[idx]) {
-                idx++;
-                for (int c=0 ; c<System.tasks.c[i] ; c++){
-                    System.execution_time_table[i][t] = 'O';
-                    t++;
-                }
-            }
-        }
-        
-    }
-
-    for (int t=0 ; t<System.total_execution_time ; t++) {
-
-    }
-    
-
+void rate_monotonic_criterion (void) {
+    // Ordering the queue in function of tasks period time
+    int* queue_aux;
+    queue_aux = array_get_idx_sort(System.tasks.p, N_TASKS);
+    array_copy(queue_aux, System.queue_task_idx_identifier, N_TASKS);
 }
 
-void escalonador (void) {
+void deadline_monotonic_criterion (void) {
+    
+}
+
+void earliest_deadline_first_criterion (void) {
     // Initializing queue with T0, T1, T2, ... order
     for (int i=0 ; i<N_TASKS; i++) {
         System.queue_task_idx_identifier[i] = i;
     }
+    
+}
 
+void escalonador (void (*priority_criterion) (void)) {
     // Initializing tasks remaining runtime (real time c)
     for (int i=0 ; i<N_TASKS ; i++) {
         System.tasks.remaining_c[i] = System.tasks.c[i];
     }
 
-    // 2. criterio de prioridade para a fila
+    set_execution_time_table();
 
-    
     int task_idx;
     for (int t=0; t<System.total_execution_time ; t++) {
+        // 2. criterio de prioridade para a fila
+        (*priority_criterion)();
+        // Polling para esperar uma tarefa pedir para entrar na fila (deu
+        // o seu periodo).
+        for (int i=0 ; i<N_TASKS ; i++) {
+            if (!(t % System.tasks.p[i])) {
+                System.tasks.remaining_c[i] = System.tasks.c[i];
+            }
+        }
+        
+        if (System.tasks.remaining_c[0] == 0) {
+            array_shift(System.queue_task_idx_identifier, N_TASKS, -1);
+        }
+        
+        
         task_idx = System.queue_task_idx_identifier[QUEUE_OPENING];
         if (System.tasks.remaining_c[task_idx] != 0) {
             System.execution_time_table[task_idx][t] = 'O';
-            System.tasks.remaining_c[task_idx] -= 1;
+            System.tasks.remaining_c[task_idx]--;
         }
+        
+        
+        
+        
         
     }
 }
 
+void rate_monotonic (void) {
+    printf(">>>Rate Monotonic (fixed priority)<<<\n");
+    escalonador(rate_monotonic_criterion);
+}
+
 void deadline_monotonic (void) {
-    printf("->Deadline Monotonic<-\n");
+    printf(">>>Deadline Monotonic<<<\n");
+    escalonador(deadline_monotonic_criterion);
 }
 
 void earliest_deadline_first (void) {
-    printf("->Earliest Deadline First<-\n");
-
-    
-    
-
-    
-    
+    printf(">>>Earliest Deadline First<<<\n");
+    escalonador(earliest_deadline_first_criterion);
 }
+
 
 
 int read_file (char system_file_path[]) {    
@@ -214,11 +224,8 @@ void system_init(char system_file_name[]) {
     }
 
     // Initializing Execution Time Table filled with '-'
-    for (int i=0; i<N_TASKS; i++) {
-        for (int t=0; t<System.total_execution_time; t++) {
-            System.execution_time_table[i][t] = '-';
-        }
-    }
+    set_execution_time_table();
+    
     print_system_execution_time_table();
 }
 
