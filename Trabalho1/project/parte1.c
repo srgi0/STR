@@ -10,7 +10,6 @@
 #define SYSTEM_FOLDER_PATH  "./sistemas/"
 
 #define N_TASKS 3
-#define N_COLS 3
 #define N_LINES N_TASKS+1
 #define MAX_EXECUTION_TIME 500
 
@@ -25,7 +24,7 @@ struct tasks {
     int d[N_TASKS];
 
     int remaining_c[N_TASKS];
-    int absolute_d[];
+    int absolute_d[N_TASKS];
 };
 
 struct system {
@@ -33,9 +32,10 @@ struct system {
     
     int queue_task_idx_identifier[N_TASKS];
 
-    int total_execution_time;
-    int number_of_periods;
     int period_time;
+    int number_of_periods;
+    int total_execution_time;
+    
     char execution_time_table[N_TASKS][MAX_EXECUTION_TIME];
 
     float utilization;
@@ -45,7 +45,7 @@ struct system {
 // -------------------------------------------------------------------------------------
 
 void calc_system_utilization () {
-    System.utilization = 0;
+    System.utilization = 0.0;
     for (int i = 0; i < N_TASKS; i++) {
         System.utilization += System.tasks.c[i]/System.tasks.p[i];
     }
@@ -76,7 +76,7 @@ void set_execution_time_table () {
 }
 
 void print_system_execution_time_table () {
-    #define period_color ANSI_COLOR_MAGENTA
+    #define period_color ANSI_COLOR_YELLOW
     #define task_color ANSI_COLOR_CYAN
     #define notask_color ANSI_COLOR_RED
 
@@ -111,35 +111,46 @@ void print_system_execution_time_table () {
     #undef notask_color
 }
 
-void rate_monotonic_criterion (void) {
+void rate_monotonic_criterion (int t) {
     // Ordering the queue in function of tasks period time
     int* queue_aux;
     queue_aux = array_get_idx_sort(System.tasks.p, N_TASKS);
     array_copy(queue_aux, System.queue_task_idx_identifier, N_TASKS);
 }
 
-void deadline_monotonic_criterion (void) {
+void deadline_monotonic_criterion (int t) {
     int* queue_aux;
     queue_aux = array_get_idx_sort(System.tasks.d, N_TASKS);
     array_copy(queue_aux, System.queue_task_idx_identifier, N_TASKS);
 }
 
-void earliest_deadline_first_criterion (void) {
+void earliest_deadline_first_criterion (int t) {
+    for (int i=0 ; i<N_TASKS ; i++) {
+        if (t > System.tasks.absolute_d[i])
+            System.tasks.absolute_d[i] += System.tasks.d[i];
+    }
 
+    int* queue_aux;
+    queue_aux = array_get_idx_sort(System.tasks.absolute_d, N_TASKS);
+    array_copy(queue_aux, System.queue_task_idx_identifier, N_TASKS);
 }
 
-void escalonador (void (*priority_criterion) (void)) {
+void escalonador (void (*queue_priority_criterion) (int time)) {
     // Initializing tasks remaining runtime (real time c)
     for (int i=0 ; i<N_TASKS ; i++) {
         System.tasks.remaining_c[i] = System.tasks.c[i];
+    }
+    // Initializing tasks absolute deadline (real time d)
+    for (int i=0 ; i<N_TASKS ; i++) {
+        System.tasks.absolute_d[i] = System.tasks.d[i];
     }
 
     set_execution_time_table();
 
     int task_idx;
     for (int t=0; t<System.total_execution_time ; t++) {
-        // 2. criterio de prioridade para a fila
-        (*priority_criterion)();
+        // criterio de prioridade para a fila
+        (*queue_priority_criterion)(t);
 
         // Polling para esperar uma tarefa pedir para entrar na fila (deu
         // o seu periodo).
@@ -228,7 +239,6 @@ void system_init(char system_file_name[]) {
     sprintf(system_file_path, "%s%s", SYSTEM_FOLDER_PATH, system_file_name);
     read_file(system_file_path);
 
-    calc_system_utilization();
 
     //System.total_execution_time = lcm(System.tasks.p, N_TASKS);
     System.period_time = array_max(System.tasks.d, N_TASKS);
@@ -237,7 +247,8 @@ void system_init(char system_file_name[]) {
     
 
     print_system_matrix();
-
+    calc_system_utilization();
+    printf("System Utilization = %.2f%%\n", 100*System.utilization);
     
     // Initializing queue in order [T1, T2, T3, T4, ...]
     for (int i = 0; i < N_TASKS; i++) {
