@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "essential.h"
 
@@ -39,22 +40,17 @@ struct system {
     char execution_time_table[N_TASKS][MAX_EXECUTION_TIME];
 
     float utilization;
+
+    float max_utilization;
 } System;
 
 
 // -------------------------------------------------------------------------------------
 
 void calc_system_utilization () {
-    System.utilization = 0.0;
-    for (int i = 0; i < N_TASKS; i++) {
+    System.utilization = 0;
+    for (int i=0 ; i<N_TASKS ; i++) {
         System.utilization += System.tasks.c[i]/System.tasks.p[i];
-    }
-}
-
-bool scalability_test () {
-    float su = System.utilization;
-    if (1) {
-
     }
 }
 
@@ -126,7 +122,7 @@ void deadline_monotonic_criterion (int t) {
 
 void earliest_deadline_first_criterion (int t) {
     for (int i=0 ; i<N_TASKS ; i++) {
-        if (t > System.tasks.absolute_d[i])
+        if (t >= System.tasks.absolute_d[i])
             System.tasks.absolute_d[i] += System.tasks.d[i];
     }
 
@@ -178,17 +174,48 @@ void escalonador (void (*queue_priority_criterion) (int time)) {
 
 void rate_monotonic (void) {
     printf(ANSI_COLOR_RED ">>>Rate Monotonic (fixed priority)<<<\n" ANSI_COLOR_RESET);
+
+    System.max_utilization = N_TASKS*(pow(2,(1/N_TASKS)) - 1);
+    printf("Max utilization = %.2f%%\n", System.max_utilization*100);
+
+    if (System.utilization <= System.max_utilization) {
+        printf("Teste suficiente mas não necessário\n");
+    }
+
     escalonador(rate_monotonic_criterion);
     
 }
 
 void deadline_monotonic (void) {
-    printf("ANSI_COLOR_RED >>>Deadline Monotonic<<<\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_RED ">>>Deadline Monotonic<<<\n" ANSI_COLOR_RESET);
+
+    System.max_utilization = N_TASKS*(pow(2,(1/N_TASKS)) - 1);
+    printf("Max utilization = %.2f%%", System.max_utilization*100);
+
+    if (System.utilization <= System.max_utilization) {
+        printf("Teste suficiente mas não necessário");
+    }
+
     escalonador(deadline_monotonic_criterion);
 }
 
 void earliest_deadline_first (void) {
     printf(ANSI_COLOR_RED ">>>Earliest Deadline First<<<\n" ANSI_COLOR_RESET);
+
+    System.max_utilization = 1;
+
+    if (array_equality(System.tasks.p, System.tasks.d, N_TASKS)) {
+        printf("D = P\n");
+
+        if (System.utilization <= System.max_utilization)
+            printf("Teste exato: permite usar 100%% do processador mantendo os deadlines.\n");
+    }
+    else{
+        printf("D < P\n");
+        if (System.utilization <= System.max_utilization)
+            printf("Teste suficiente.\n");
+    }
+
     escalonador(earliest_deadline_first_criterion);
 }
 
@@ -247,6 +274,7 @@ void system_init(char system_file_name[]) {
     
 
     print_system_matrix();
+
     calc_system_utilization();
     printf("System Utilization = %.2f%%\n", 100*System.utilization);
     
@@ -269,11 +297,13 @@ int main(int argc, char *argv[]) {
 
     char menu_option[4] = {'0','0','0','0'};
     while (strcmp(menu_option, "exit")) {
+        /*
         printf("----------------------------------------------\n");
         printf("Number of system periods: ");
         scanf("%d", &System.number_of_periods);
         System.total_execution_time = System.number_of_periods*System.period_time;
         printf("----------------------------------------------\n");
+        */
 
         printf("----------------------------------------------\n");
         printf("Escolha o Algoritmo de Escalonamento ou <exit> para sair:\n");

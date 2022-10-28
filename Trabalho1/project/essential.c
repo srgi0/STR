@@ -106,7 +106,6 @@ int lcm (const int numbers[], int n) {
 
     int lcm = 1;
 
-    int i;
     for (int aux=0 ; aux < 6; aux++) {
         for (int i=0 ; i<n && !array_all_one(numbers_cp, n) ; i++) {
             if ((numbers_cp[i] % primo[aux] == 0)) {
