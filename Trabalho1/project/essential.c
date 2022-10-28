@@ -75,9 +75,9 @@ int* array_get_idx_sort (int arr[], int n) {
     return idx;
 }
 
-void array_multiply (int arr[], int mult, int n) {
+void array_scalar_multiply (int arr[], int scalar, int n) {
     for (int i=0 ; i<n; i++) {
-        arr[i] *= mult;
+        arr[i] *= scalar;
     }
 }
 
