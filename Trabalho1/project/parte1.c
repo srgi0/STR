@@ -34,6 +34,8 @@ struct system {
     int queue_task_idx_identifier[N_TASKS];
 
     int total_execution_time;
+    int number_of_periods;
+    int period_time;
     char execution_time_table[N_TASKS][MAX_EXECUTION_TIME];
 
     float utilization;
@@ -74,12 +76,26 @@ void set_execution_time_table () {
 }
 
 void print_system_execution_time_table () {
-    printf("Printing Execution Time Table...\n");
+    #define period_color ANSI_COLOR_MAGENTA
+    #define task_color ANSI_COLOR_CYAN
+    #define notask_color ANSI_COLOR_RED
+
+    printf("Printing %d period Execution Time Table...\n", System.number_of_periods);
     for (int i = 0; i < N_TASKS; i++){
         printf("%s [", System.tasks.name[i]);
         for (int t = 0; t < System.total_execution_time; t++){
-            printf("|%c|", System.execution_time_table[i][t]);
+            if (! (t % System.tasks.p[i]))
+                printf(period_color "|" ANSI_COLOR_RESET);
+            else
+                printf("|");
+
+            if (System.execution_time_table[i][t] == 'O')
+                printf(task_color "%c" ANSI_COLOR_RESET, System.execution_time_table[i][t]);
+            else
+                printf(notask_color "%c" ANSI_COLOR_RESET, System.execution_time_table[i][t]);
+            printf("|");
         }
+        printf(period_color "|" ANSI_COLOR_RESET);
         printf("]\n");
     }
 
@@ -88,6 +104,11 @@ void print_system_execution_time_table () {
         printf("%02d ", i+1);
     }
     printf(")\n");
+
+
+    #undef period_color
+    #undef task_color
+    #undef notask_color
 }
 
 void rate_monotonic_criterion (void) {
@@ -98,15 +119,13 @@ void rate_monotonic_criterion (void) {
 }
 
 void deadline_monotonic_criterion (void) {
-    
+    int* queue_aux;
+    queue_aux = array_get_idx_sort(System.tasks.d, N_TASKS);
+    array_copy(queue_aux, System.queue_task_idx_identifier, N_TASKS);
 }
 
 void earliest_deadline_first_criterion (void) {
-    // Initializing queue with T0, T1, T2, ... order
-    for (int i=0 ; i<N_TASKS; i++) {
-        System.queue_task_idx_identifier[i] = i;
-    }
-    
+
 }
 
 void escalonador (void (*priority_criterion) (void)) {
@@ -121,16 +140,19 @@ void escalonador (void (*priority_criterion) (void)) {
     for (int t=0; t<System.total_execution_time ; t++) {
         // 2. criterio de prioridade para a fila
         (*priority_criterion)();
+
         // Polling para esperar uma tarefa pedir para entrar na fila (deu
         // o seu periodo).
         for (int i=0 ; i<N_TASKS ; i++) {
-            if (!(t % System.tasks.p[i])) {
+            if (! (t % System.tasks.p[i])) {
                 System.tasks.remaining_c[i] = System.tasks.c[i];
             }
         }
-        
-        if (System.tasks.remaining_c[0] == 0) {
+
+        for (int i=0 ; i<N_TASKS-1 ; i++) {
+            if (! System.tasks.remaining_c[System.queue_task_idx_identifier[QUEUE_OPENING]]) {
             array_shift(System.queue_task_idx_identifier, N_TASKS, -1);
+            }
         }
         
         
@@ -138,27 +160,24 @@ void escalonador (void (*priority_criterion) (void)) {
         if (System.tasks.remaining_c[task_idx] != 0) {
             System.execution_time_table[task_idx][t] = 'O';
             System.tasks.remaining_c[task_idx]--;
-        }
-        
-        
-        
-        
+        }       
         
     }
 }
 
 void rate_monotonic (void) {
-    printf(">>>Rate Monotonic (fixed priority)<<<\n");
+    printf(ANSI_COLOR_RED ">>>Rate Monotonic (fixed priority)<<<\n" ANSI_COLOR_RESET);
     escalonador(rate_monotonic_criterion);
+    
 }
 
 void deadline_monotonic (void) {
-    printf(">>>Deadline Monotonic<<<\n");
+    printf("ANSI_COLOR_RED >>>Deadline Monotonic<<<\n" ANSI_COLOR_RESET);
     escalonador(deadline_monotonic_criterion);
 }
 
 void earliest_deadline_first (void) {
-    printf(">>>Earliest Deadline First<<<\n");
+    printf(ANSI_COLOR_RED ">>>Earliest Deadline First<<<\n" ANSI_COLOR_RESET);
     escalonador(earliest_deadline_first_criterion);
 }
 
@@ -212,7 +231,9 @@ void system_init(char system_file_name[]) {
     calc_system_utilization();
 
     //System.total_execution_time = lcm(System.tasks.p, N_TASKS);
-    System.total_execution_time = array_max(System.tasks.d, N_TASKS);
+    System.period_time = array_max(System.tasks.d, N_TASKS);
+    System.number_of_periods = 1;
+    System.total_execution_time = System.number_of_periods*System.period_time;
     
 
     print_system_matrix();
@@ -237,6 +258,12 @@ int main(int argc, char *argv[]) {
 
     char menu_option[4] = {'0','0','0','0'};
     while (strcmp(menu_option, "exit")) {
+        printf("----------------------------------------------\n");
+        printf("Number of system periods: ");
+        scanf("%d", &System.number_of_periods);
+        System.total_execution_time = System.number_of_periods*System.period_time;
+        printf("----------------------------------------------\n");
+
         printf("----------------------------------------------\n");
         printf("Escolha o Algoritmo de Escalonamento ou <exit> para sair:\n");
         printf("\t- <RM> (Rate Monotonic)\n");
