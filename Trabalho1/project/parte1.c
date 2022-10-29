@@ -48,9 +48,8 @@ struct system {
 // -------------------------------------------------------------------------------------
 
 void calc_system_utilization () {
-    System.utilization = 0;
     for (int i=0 ; i<N_TASKS ; i++) {
-        System.utilization += System.tasks.c[i]/System.tasks.p[i];
+        System.utilization += (float) System.tasks.c[i] / (float) System.tasks.p[i];
     }
 }
 
@@ -60,7 +59,7 @@ void print_system_matrix (void) {
     for (int j = 0; j < N_TASKS; j++) {
         printf("%s\t%d\t%d\t%d\n", System.tasks.name[j], System.tasks.p[j], System.tasks.c[j], System.tasks.d[j]);
     }
-    printf("--------------------------\n\n");
+    printf("--------------------------\n");
 }
 
 void set_execution_time_table () {
@@ -76,7 +75,7 @@ void print_system_execution_time_table () {
     #define task_color ANSI_COLOR_CYAN
     #define notask_color ANSI_COLOR_RED
 
-    printf("Printing %d period Execution Time Table...\n", System.number_of_periods);
+    printf("\nPrinting %d period Execution Time Table...\n", System.number_of_periods);
     for (int i = 0; i < N_TASKS; i++){
         printf("%s [", System.tasks.name[i]);
         for (int t = 0; t < System.total_execution_time; t++){
@@ -100,6 +99,7 @@ void print_system_execution_time_table () {
         printf("%02d ", i+1);
     }
     printf(")\n");
+    printf("\n");
 
 
     #undef period_color
@@ -167,16 +167,51 @@ void escalonador (void (*queue_priority_criterion) (int time)) {
         if (System.tasks.remaining_c[task_idx] != 0) {
             System.execution_time_table[task_idx][t] = 'O';
             System.tasks.remaining_c[task_idx]--;
-        }       
+        }
         
     }
+}
+
+void escalabilidade_check (void) {
+    printf("---------------------------------------------\n");
+
+    printf("System Utilization = %.2f%%\n", System.utilization*100);
+    printf(ANSI_COLOR_GREEN "[Fixed priority]\n" ANSI_COLOR_RESET);
+    System.max_utilization = (float) N_TASKS*(pow(2.0,(1.0/N_TASKS)) - 1);
+    printf("\tMax utilization = %.2f%%\n", System.max_utilization*100);
+
+    printf(ANSI_COLOR_RED);
+    if (System.utilization <= System.max_utilization) {
+        printf("\t-> O sistema é escalonável (teste suficiente mas não necessário)\n");
+    }
+    else {
+        printf("\t-> Não passou no teste suficiente mas não necessário\n");
+    }
+    printf(ANSI_COLOR_RESET);
+    
+
+    printf(ANSI_COLOR_GREEN "[Variable priority]\n" ANSI_COLOR_RESET);
+    System.max_utilization = 1.0;
+    printf("\tMax utilization = %.2f%%\n", System.max_utilization*100);
+    if (array_equality(System.tasks.d, System.tasks.p, N_TASKS)) {
+        printf("\t(Teste Exato)\n");
+        if (System.utilization <= 1)
+            printf(ANSI_COLOR_RED "\t-> O sistema é escalonável (permite usar 100%% do processador mantendo os deadlines)\n" ANSI_COLOR_RESET);
+    }
+    else {
+        printf("\t(Teste suficiente)\n");
+        if (System.utilization <= 1)
+            printf(ANSI_COLOR_RED "\t-> O sistema é escalonável\n" ANSI_COLOR_RESET);
+    }
+    
+
+
+    printf("---------------------------------------------\n");
 }
 
 void rate_monotonic (void) {
     printf(ANSI_COLOR_RED ">>>Rate Monotonic (fixed priority)<<<\n" ANSI_COLOR_RESET);
 
-    System.max_utilization = N_TASKS*(pow(2,(1/N_TASKS)) - 1);
-    printf("Max utilization = %.2f%%\n", System.max_utilization*100);
 
     if (System.utilization <= System.max_utilization) {
         printf("Teste suficiente mas não necessário\n");
@@ -188,14 +223,6 @@ void rate_monotonic (void) {
 
 void deadline_monotonic (void) {
     printf(ANSI_COLOR_RED ">>>Deadline Monotonic<<<\n" ANSI_COLOR_RESET);
-
-    System.max_utilization = N_TASKS*(pow(2,(1/N_TASKS)) - 1);
-    printf("Max utilization = %.2f%%", System.max_utilization*100);
-
-    if (System.utilization <= System.max_utilization) {
-        printf("Teste suficiente mas não necessário");
-    }
-
     escalonador(deadline_monotonic_criterion);
 }
 
@@ -276,7 +303,6 @@ void system_init(char system_file_name[]) {
     print_system_matrix();
 
     calc_system_utilization();
-    printf("System Utilization = %.2f%%\n", 100*System.utilization);
     
     // Initializing queue in order [T1, T2, T3, T4, ...]
     for (int i = 0; i < N_TASKS; i++) {
@@ -287,6 +313,8 @@ void system_init(char system_file_name[]) {
     set_execution_time_table();
     
     print_system_execution_time_table();
+
+    escalabilidade_check();
 }
 
 // -------------------------------------------------------------------------------------
