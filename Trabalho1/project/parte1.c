@@ -71,9 +71,9 @@ void set_execution_time_table () {
 }
 
 void print_system_execution_time_table () {
-    #define period_color ANSI_COLOR_YELLOW
+    #define period_color ANSI_COLOR_RED
     #define task_color ANSI_COLOR_CYAN
-    #define notask_color ANSI_COLOR_RED
+    #define notask_color ANSI_COLOR_YELLOW
 
     printf("Printing %d period Execution Time Table...\n", System.number_of_periods);
     for (int i = 0; i < N_TASKS; i++){
@@ -288,13 +288,24 @@ void system_init(char system_file_name[]) {
     for (int i = 0; i < N_TASKS; i++) {
         System.queue_task_idx_identifier[i] = i;
     }
+    
+    escalabilidade_check();
 
     // Initializing Execution Time Table filled with '-'
     set_execution_time_table();
-    
     print_system_execution_time_table();
+}
 
-    escalabilidade_check();
+void menu_screen (char menu_option[]) {
+    printf("----------------------------------------------\n");
+    printf("Escolha o Algoritmo de Escalonamento ou <exit> para sair:\n");
+    printf("\t- <RM> (Rate Monotonic)\n");
+    printf("\t- <DM> (Deadline Monotonic)\n");
+    printf("\t- <EDF> (Earliest Deadline First)\n");
+    printf("\t- <exit> (Sair do programa)\n");
+    printf("--> ");
+    scanf("%s", menu_option);
+    printf("\n");
 }
 
 // -------------------------------------------------------------------------------------
@@ -313,16 +324,11 @@ int main(int argc, char *argv[]) {
         printf("----------------------------------------------\n");
         */
 
-        printf("----------------------------------------------\n");
-        printf("Escolha o Algoritmo de Escalonamento ou <exit> para sair:\n");
-        printf("\t- <RM> (Rate Monotonic)\n");
-        printf("\t- <DM> (Deadline Monotonic)\n");
-        printf("\t- <EDF> (Earliest Deadline First)\n");
-        printf("\t- <exit> (Sair do programa)\n");
-        printf("--> ");
-        scanf("%s", menu_option);
-        printf("\n");
+        menu_screen(menu_option);
 
+        system("clear");
+        print_system_matrix();
+        escalabilidade_check();
         if (!strcmp(menu_option, "RM")) {
             rate_monotonic();
             print_system_execution_time_table();
