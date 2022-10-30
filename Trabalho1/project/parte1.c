@@ -75,7 +75,7 @@ void print_system_execution_time_table () {
     #define task_color ANSI_COLOR_CYAN
     #define notask_color ANSI_COLOR_RED
 
-    printf("\nPrinting %d period Execution Time Table...\n", System.number_of_periods);
+    printf("Printing %d period Execution Time Table...\n", System.number_of_periods);
     for (int i = 0; i < N_TASKS; i++){
         printf("%s [", System.tasks.name[i]);
         for (int t = 0; t < System.total_execution_time; t++){
@@ -143,7 +143,7 @@ void escalonador (void (*queue_priority_criterion) (int time)) {
 
     set_execution_time_table();
 
-    int task_idx;
+    int aux;
     for (int t=0; t<System.total_execution_time ; t++) {
         // criterio de prioridade para a fila
         (*queue_priority_criterion)(t);
@@ -155,7 +155,8 @@ void escalonador (void (*queue_priority_criterion) (int time)) {
                 System.tasks.remaining_c[i] = System.tasks.c[i];
             }
         }
-
+        // Quando acabar a execução de uma tarefa, ela vai para o final da fila e a próxima
+        // tarefa vai para o início (shift)
         for (int i=0 ; i<N_TASKS-1 ; i++) {
             if (! System.tasks.remaining_c[System.queue_task_idx_identifier[QUEUE_OPENING]]) {
             array_shift(System.queue_task_idx_identifier, N_TASKS, -1);
@@ -163,10 +164,10 @@ void escalonador (void (*queue_priority_criterion) (int time)) {
         }
         
         
-        task_idx = System.queue_task_idx_identifier[QUEUE_OPENING];
-        if (System.tasks.remaining_c[task_idx] != 0) {
-            System.execution_time_table[task_idx][t] = 'O';
-            System.tasks.remaining_c[task_idx]--;
+        aux = System.queue_task_idx_identifier[QUEUE_OPENING];
+        if (System.tasks.remaining_c[aux]) {
+            System.execution_time_table[aux][t] = 'O';
+            System.tasks.remaining_c[aux]--;
         }
         
     }
@@ -211,12 +212,6 @@ void escalabilidade_check (void) {
 
 void rate_monotonic (void) {
     printf(ANSI_COLOR_RED ">>>Rate Monotonic (fixed priority)<<<\n" ANSI_COLOR_RESET);
-
-
-    if (System.utilization <= System.max_utilization) {
-        printf("Teste suficiente mas não necessário\n");
-    }
-
     escalonador(rate_monotonic_criterion);
     
 }
@@ -228,21 +223,6 @@ void deadline_monotonic (void) {
 
 void earliest_deadline_first (void) {
     printf(ANSI_COLOR_RED ">>>Earliest Deadline First<<<\n" ANSI_COLOR_RESET);
-
-    System.max_utilization = 1;
-
-    if (array_equality(System.tasks.p, System.tasks.d, N_TASKS)) {
-        printf("D = P\n");
-
-        if (System.utilization <= System.max_utilization)
-            printf("Teste exato: permite usar 100%% do processador mantendo os deadlines.\n");
-    }
-    else{
-        printf("D < P\n");
-        if (System.utilization <= System.max_utilization)
-            printf("Teste suficiente.\n");
-    }
-
     escalonador(earliest_deadline_first_criterion);
 }
 
@@ -275,7 +255,7 @@ int read_file (char system_file_path[]) {
         }
         if (sscanf(buf, "%d%d%d", &System.tasks.p[i],
                    &System.tasks.c[i], &System.tasks.d[i]) == 3) {
-            sprintf(System.tasks.name[i], "T%d", i);
+            sprintf(System.tasks.name[i], "T%d", i+1);
             i++;
         } else {
             fprintf(stderr, "%s:%d: invalid format: %s", 
@@ -341,6 +321,7 @@ int main(int argc, char *argv[]) {
         printf("\t- <exit> (Sair do programa)\n");
         printf("--> ");
         scanf("%s", menu_option);
+        printf("\n");
 
         if (!strcmp(menu_option, "RM")) {
             rate_monotonic();
