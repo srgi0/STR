@@ -85,9 +85,9 @@ void print_system_execution_time_table () {
                 printf("|");
 
             if (System.execution_time_table[i][t] == 'O')
-                printf(task_color "%c" CRESET, System.execution_time_table[i][t]);
+                printf(WHTB /*task_color*/ /*"%c"*/" " CRESET/*, System.execution_time_table[i][t]*/);
             else
-                printf(notask_color "%c" CRESET, System.execution_time_table[i][t]);
+                printf(notask_color "%c"CRESET, System.execution_time_table[i][t]);
             printf("|");
         }
         printf(period_color "|" CRESET);
