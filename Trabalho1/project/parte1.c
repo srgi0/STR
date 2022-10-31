@@ -282,7 +282,7 @@ void system_init(char system_file_name[]) {
     System.number_of_periods = 1;
     System.total_execution_time = System.number_of_periods*System.period_time;
     
-
+    printf("%s\n", system_file_name);
     print_system_matrix();
 
     calc_system_utilization();
@@ -329,18 +329,30 @@ int main(int argc, char *argv[]) {
 
         menu_screen(menu_option);
 
-        system("clear");
-        print_system_matrix();
-        escalabilidade_check();
         if (!strcmp(menu_option, "RM")) {
+            system("clear");
+            printf("%s\n", argv[1]);
+            print_system_matrix();
+            escalabilidade_check();
+
             rate_monotonic();
             print_system_execution_time_table();
         } else
         if (!strcmp(menu_option, "DM")) {
+            system("clear");
+            printf("%s\n", argv[1]);
+            print_system_matrix();
+            escalabilidade_check();
+
             deadline_monotonic();
             print_system_execution_time_table();
         } else
         if (!strcmp(menu_option, "EDF")){
+            system("clear");
+            printf("%s\n", argv[1]);
+            print_system_matrix();
+            escalabilidade_check();
+
             earliest_deadline_first();
             print_system_execution_time_table();
         } 
