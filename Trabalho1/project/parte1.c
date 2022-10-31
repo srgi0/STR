@@ -71,26 +71,26 @@ void set_execution_time_table () {
 }
 
 void print_system_execution_time_table () {
-    #define period_color ANSI_COLOR_RED
-    #define task_color ANSI_COLOR_CYAN
-    #define notask_color ANSI_COLOR_YELLOW
+    #define period_color HRED
+    #define task_color HCYN
+    #define notask_color HYEL
 
     printf("Printing %d period Execution Time Table...\n", System.number_of_periods);
     for (int i = 0; i < N_TASKS; i++){
         printf("%s [", System.tasks.name[i]);
         for (int t = 0; t < System.total_execution_time; t++){
             if (! (t % System.tasks.p[i]))
-                printf(period_color "|" ANSI_COLOR_RESET);
+                printf(period_color "|" CRESET);
             else
                 printf("|");
 
             if (System.execution_time_table[i][t] == 'O')
-                printf(task_color "%c" ANSI_COLOR_RESET, System.execution_time_table[i][t]);
+                printf(task_color "%c" CRESET, System.execution_time_table[i][t]);
             else
-                printf(notask_color "%c" ANSI_COLOR_RESET, System.execution_time_table[i][t]);
+                printf(notask_color "%c" CRESET, System.execution_time_table[i][t]);
             printf("|");
         }
-        printf(period_color "|" ANSI_COLOR_RESET);
+        printf(period_color "|" CRESET);
         printf("]\n");
     }
 
@@ -174,35 +174,38 @@ void escalonador (void (*queue_priority_criterion) (int time)) {
 }
 
 void escalabilidade_check (void) {
+    #define PRIORITY_TYPE       GRN
+    #define SCALABILITY_TEST    RED
+    
     printf("---------------------------------------------\n");
 
     printf("System Utilization = %.2f%%\n", System.utilization*100);
-    printf(ANSI_COLOR_GREEN "[Fixed priority]\n" ANSI_COLOR_RESET);
+    printf(PRIORITY_TYPE "[Fixed priority]\n" CRESET);
     System.max_utilization = (float) N_TASKS*(pow(2.0,(1.0/N_TASKS)) - 1);
     printf("\tMax utilization = %.2f%%\n", System.max_utilization*100);
 
-    printf(ANSI_COLOR_RED);
+    printf(SCALABILITY_TEST);
     if (System.utilization <= System.max_utilization) {
         printf("\t-> O sistema é escalonável (teste suficiente mas não necessário)\n");
     }
     else {
         printf("\t-> Não passou no teste suficiente mas não necessário\n");
     }
-    printf(ANSI_COLOR_RESET);
+    printf(CRESET);
     
 
-    printf(ANSI_COLOR_GREEN "[Variable priority]\n" ANSI_COLOR_RESET);
+    printf(PRIORITY_TYPE "[Variable priority]\n" CRESET);
     System.max_utilization = 1.0;
     printf("\tMax utilization = %.2f%%\n", System.max_utilization*100);
     if (array_equality(System.tasks.d, System.tasks.p, N_TASKS)) {
         printf("\t(Teste Exato)\n");
         if (System.utilization <= 1)
-            printf(ANSI_COLOR_RED "\t-> O sistema é escalonável (permite usar 100%% do processador mantendo os deadlines)\n" ANSI_COLOR_RESET);
+            printf(SCALABILITY_TEST "\t-> O sistema é escalonável (permite usar 100%% do processador mantendo os deadlines)\n" CRESET);
     }
     else {
         printf("\t(Teste suficiente)\n");
         if (System.utilization <= 1)
-            printf(ANSI_COLOR_RED "\t-> O sistema é escalonável\n" ANSI_COLOR_RESET);
+            printf(SCALABILITY_TEST "\t-> O sistema é escalonável\n" CRESET);
     }
     
 
@@ -211,18 +214,18 @@ void escalabilidade_check (void) {
 }
 
 void rate_monotonic (void) {
-    printf(ANSI_COLOR_RED ">>>Rate Monotonic (fixed priority)<<<\n" ANSI_COLOR_RESET);
+    printf(RED ">>>Rate Monotonic (fixed priority)<<<\n" CRESET);
     escalonador(rate_monotonic_criterion);
     
 }
 
 void deadline_monotonic (void) {
-    printf(ANSI_COLOR_RED ">>>Deadline Monotonic<<<\n" ANSI_COLOR_RESET);
+    printf(RED ">>>Deadline Monotonic<<<\n" CRESET);
     escalonador(deadline_monotonic_criterion);
 }
 
 void earliest_deadline_first (void) {
-    printf(ANSI_COLOR_RED ">>>Earliest Deadline First<<<\n" ANSI_COLOR_RESET);
+    printf(RED ">>>Earliest Deadline First<<<\n" CRESET);
     escalonador(earliest_deadline_first_criterion);
 }
 
