@@ -71,9 +71,9 @@ void set_execution_time_table () {
 }
 
 void print_system_execution_time_table () {
-    #define period_color HRED
-    #define task_color HCYN
-    #define notask_color HYEL
+    #define period_color BRED
+    #define task_color CYNB
+    #define notask_color BYEL
 
     printf("Printing %d period Execution Time Table...\n", System.number_of_periods);
     for (int i = 0; i < N_TASKS; i++){
@@ -85,7 +85,7 @@ void print_system_execution_time_table () {
                 printf("|");
 
             if (System.execution_time_table[i][t] == 'O')
-                printf(WHTB /*task_color*/ /*"%c"*/" " CRESET/*, System.execution_time_table[i][t]*/);
+                printf(task_color " " CRESET);
             else
                 printf(notask_color "%c"CRESET, System.execution_time_table[i][t]);
             printf("|");
