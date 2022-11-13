@@ -10,45 +10,45 @@
 
 #define SYSTEM_FOLDER_PATH  "./sistemas/"
 
-#define N_TASKS 3
-#define N_LINES N_TASKS+1
+#define MAX_N_TASKS 50
+#define MAX_N_LINES MAX_N_TASKS+1
 #define MAX_EXECUTION_TIME 500
 
 #define QUEUE_OPENING 0
-#define QUEUE_LAST N_TASKS
 
 struct tasks {
-    char name[N_TASKS][10];
+    char name[MAX_N_TASKS][10];
 
-    int p[N_TASKS];
-    int c[N_TASKS];
-    int d[N_TASKS];
+    int p[MAX_N_TASKS];
+    int c[MAX_N_TASKS];
+    int d[MAX_N_TASKS];
 
-    int remaining_c[N_TASKS];
-    int absolute_d[N_TASKS];
+    int remaining_c[MAX_N_TASKS];
+    int absolute_d[MAX_N_TASKS];
 };
 
 struct system {
     struct tasks tasks;
     
-    int queue_task_idx_identifier[N_TASKS];
+    int queue_task_idx_identifier[MAX_N_TASKS];
 
     int period_time;
     int number_of_periods;
     int total_execution_time;
     
-    char execution_time_table[N_TASKS][MAX_EXECUTION_TIME];
+    char execution_time_table[MAX_N_TASKS][MAX_EXECUTION_TIME];
 
     float utilization;
 
     float max_utilization;
 } System;
 
+int n_tasks;
 
 // -------------------------------------------------------------------------------------
 
 void calc_system_utilization () {
-    for (int i=0 ; i<N_TASKS ; i++) {
+    for (int i=0 ; i<n_tasks ; i++) {
         System.utilization += (float) System.tasks.c[i] / (float) System.tasks.p[i];
     }
 }
@@ -56,14 +56,14 @@ void calc_system_utilization () {
 void print_system_matrix (void) {
     printf("--------------------------\n");
     printf("\tP\tC\tD\n");
-    for (int j = 0; j < N_TASKS; j++) {
+    for (int j = 0; j < n_tasks; j++) {
         printf("%s\t%d\t%d\t%d\n", System.tasks.name[j], System.tasks.p[j], System.tasks.c[j], System.tasks.d[j]);
     }
     printf("--------------------------\n");
 }
 
 void set_execution_time_table () {
-    for (int i=0; i<N_TASKS; i++) {
+    for (int i=0; i<n_tasks; i++) {
         for (int t=0; t<System.total_execution_time; t++) {
             System.execution_time_table[i][t] = '-';
         }
@@ -76,7 +76,7 @@ void print_system_execution_time_table () {
     #define notask_color BYEL
 
     printf("Printing %d period Execution Time Table...\n", System.number_of_periods);
-    for (int i = 0; i < N_TASKS; i++){
+    for (int i = 0; i < n_tasks; i++){
         printf("%s [", System.tasks.name[i]);
         for (int t = 0; t < System.total_execution_time; t++){
             if (! (t % System.tasks.p[i]))
@@ -110,34 +110,34 @@ void print_system_execution_time_table () {
 void rate_monotonic_criterion (int t) {
     // Ordering the queue in function of tasks period time
     int* queue_aux;
-    queue_aux = array_get_idx_sort(System.tasks.p, N_TASKS);
-    array_copy(queue_aux, System.queue_task_idx_identifier, N_TASKS);
+    queue_aux = array_get_idx_sort(System.tasks.p, n_tasks);
+    array_copy(queue_aux, System.queue_task_idx_identifier, n_tasks);
 }
 
 void deadline_monotonic_criterion (int t) {
     int* queue_aux;
-    queue_aux = array_get_idx_sort(System.tasks.d, N_TASKS);
-    array_copy(queue_aux, System.queue_task_idx_identifier, N_TASKS);
+    queue_aux = array_get_idx_sort(System.tasks.d, n_tasks);
+    array_copy(queue_aux, System.queue_task_idx_identifier, n_tasks);
 }
 
 void earliest_deadline_first_criterion (int t) {
-    for (int i=0 ; i<N_TASKS ; i++) {
+    for (int i=0 ; i<n_tasks ; i++) {
         if (t >= System.tasks.absolute_d[i])
             System.tasks.absolute_d[i] += System.tasks.d[i];
     }
 
     int* queue_aux;
-    queue_aux = array_get_idx_sort(System.tasks.absolute_d, N_TASKS);
-    array_copy(queue_aux, System.queue_task_idx_identifier, N_TASKS);
+    queue_aux = array_get_idx_sort(System.tasks.absolute_d, n_tasks);
+    array_copy(queue_aux, System.queue_task_idx_identifier, n_tasks);
 }
 
 void escalonador (void (*queue_priority_criterion) (int time)) {
     // Initializing tasks remaining runtime (real time c)
-    for (int i=0 ; i<N_TASKS ; i++) {
+    for (int i=0 ; i<n_tasks ; i++) {
         System.tasks.remaining_c[i] = System.tasks.c[i];
     }
     // Initializing tasks absolute deadline (real time d)
-    for (int i=0 ; i<N_TASKS ; i++) {
+    for (int i=0 ; i<n_tasks ; i++) {
         System.tasks.absolute_d[i] = System.tasks.d[i];
     }
 
@@ -150,16 +150,16 @@ void escalonador (void (*queue_priority_criterion) (int time)) {
 
         // Polling para esperar uma tarefa pedir para entrar na fila (deu
         // o seu periodo).
-        for (int i=0 ; i<N_TASKS ; i++) {
+        for (int i=0 ; i<n_tasks ; i++) {
             if (! (t % System.tasks.p[i])) {
                 System.tasks.remaining_c[i] = System.tasks.c[i];
             }
         }
         // Quando acabar a execução de uma tarefa, ela vai para o final da fila e a próxima
         // tarefa vai para o início (shift)
-        for (int i=0 ; i<N_TASKS-1 ; i++) {
+        for (int i=0 ; i<n_tasks-1 ; i++) {
             if (! System.tasks.remaining_c[System.queue_task_idx_identifier[QUEUE_OPENING]]) {
-            array_shift(System.queue_task_idx_identifier, N_TASKS, -1);
+            array_shift(System.queue_task_idx_identifier, n_tasks, -1);
             }
         }
         
@@ -181,7 +181,7 @@ void escalabilidade_check (void) {
 
     printf("System Utilization = %.2f%%\n", System.utilization*100);
     printf(PRIORITY_TYPE "[Fixed priority]\n" CRESET);
-    System.max_utilization = (float) N_TASKS*(pow(2.0,(1.0/N_TASKS)) - 1);
+    System.max_utilization = (float) n_tasks*(pow(2.0,(1.0/n_tasks)) - 1);
     printf("\tMax utilization = %.2f%%\n", System.max_utilization*100);
 
     printf(SCALABILITY_TEST);
@@ -197,7 +197,7 @@ void escalabilidade_check (void) {
     printf(PRIORITY_TYPE "[Variable priority]\n" CRESET);
     System.max_utilization = 1.0;
     printf("\tMax utilization = %.2f%%\n", System.max_utilization*100);
-    if (array_equality(System.tasks.d, System.tasks.p, N_TASKS)) {
+    if (array_equality(System.tasks.d, System.tasks.p, n_tasks)) {
         printf("\t(Teste Exato)\n");
         if (System.utilization <= 1)
             printf(SCALABILITY_TEST "\t-> O sistema é escalonável (permite usar 100%% do processador mantendo os deadlines)\n" CRESET);
@@ -231,7 +231,9 @@ void earliest_deadline_first (void) {
 
 
 
-int read_file (char system_file_path[]) {    
+int read_file (char system_file_path[]) {
+    int nlines = 0;
+
     /* 
     Assuming that System.txt has content in below format:
         P       C       D
@@ -249,7 +251,7 @@ int read_file (char system_file_path[]) {
     fgets(buf, sizeof buf, file_ptr);
     line++;
     // parse the file contents
-    for (int i = 0; i < N_LINES;) {
+    for (int i = 0; i < MAX_N_LINES;) {
         line++;
         if (!fgets(buf, sizeof buf, file_ptr)) {
             fprintf(stderr, "%s:%d: missing records\n",
@@ -260,6 +262,7 @@ int read_file (char system_file_path[]) {
                    &System.tasks.c[i], &System.tasks.d[i]) == 3) {
             sprintf(System.tasks.name[i], "T%d", i+1);
             i++;
+            nlines++;
         } else {
             fprintf(stderr, "%s:%d: invalid format: %s", 
                     system_file_path, line, buf);
@@ -267,18 +270,17 @@ int read_file (char system_file_path[]) {
     }
     fclose(file_ptr);
     //...
-    return 0;
-
+    return nlines;
 }
 
 void system_init(char system_file_name[]) {
     char system_file_path[50];
     sprintf(system_file_path, "%s%s", SYSTEM_FOLDER_PATH, system_file_name);
-    read_file(system_file_path);
+    n_tasks = read_file(system_file_path);
 
 
-    //System.total_execution_time = lcm(System.tasks.p, N_TASKS);
-    System.period_time = array_max(System.tasks.d, N_TASKS);
+    //System.total_execution_time = lcm(System.tasks.p, n_tasks);
+    System.period_time = array_max(System.tasks.d, n_tasks);
     System.number_of_periods = 1;
     System.total_execution_time = System.number_of_periods*System.period_time;
     
@@ -288,7 +290,7 @@ void system_init(char system_file_name[]) {
     calc_system_utilization();
     
     // Initializing queue in order [T1, T2, T3, T4, ...]
-    for (int i = 0; i < N_TASKS; i++) {
+    for (int i = 0; i < n_tasks; i++) {
         System.queue_task_idx_identifier[i] = i;
     }
     
