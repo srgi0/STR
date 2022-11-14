@@ -39,6 +39,7 @@ struct system {
     char execution_time_table[MAX_N_TASKS][MAX_EXECUTION_TIME];
 
     float utilization;
+    float deadline_utilization;
 
     float max_utilization;
 } System;
@@ -50,6 +51,8 @@ int n_tasks;
 void calc_system_utilization () {
     for (int i=0 ; i<n_tasks ; i++) {
         System.utilization += (float) System.tasks.c[i] / (float) System.tasks.p[i];
+
+        System.deadline_utilization += (float) System.tasks.c[i] / (float) System.tasks.d[i];
     }
 }
 
@@ -87,7 +90,7 @@ void print_system_execution_time_table () {
             if (System.execution_time_table[i][t] == 'O')
                 printf(task_color " " CRESET);
             else
-                printf(notask_color "%c"CRESET, System.execution_time_table[i][t]);
+                printf(notask_color "%c" CRESET, System.execution_time_table[i][t]);
             printf("|");
         }
         printf(period_color "|" CRESET);
@@ -198,14 +201,25 @@ void escalabilidade_check (void) {
     System.max_utilization = 1.0;
     printf("\tMax utilization = %.2f%%\n", System.max_utilization*100);
     if (array_equality(System.tasks.d, System.tasks.p, n_tasks)) {
-        printf("\t(Teste Exato)\n");
+        printf("\t D=P (Teste Exato)\n");
+        printf(SCALABILITY_TEST);
         if (System.utilization <= 1)
-            printf(SCALABILITY_TEST "\t-> O sistema é escalonável (permite usar 100%% do processador mantendo os deadlines)\n" CRESET);
+            printf("\t\t-> O sistema é escalonável (permite usar 100%% do processador mantendo os deadlines)\n");
+        else
+            printf("\t\t-> Não passou no teste exato\n");
+
+        printf(CRESET);
     }
     else {
-        printf("\t(Teste suficiente)\n");
-        if (System.utilization <= 1)
-            printf(SCALABILITY_TEST "\t-> O sistema é escalonável\n" CRESET);
+        printf("\t D<P (Teste suficiente)\n");
+        printf("Deadline Utilization = %.2f%%\n", System.deadline_utilization);
+        printf(SCALABILITY_TEST);
+        if (System.deadline_utilization <= 1)
+            printf("\t\t-> O sistema é escalonável\n");
+        else
+            printf("\t\t-> Não passou no teste suficiente\n");
+
+        printf(CRESET);
     }
     
 
@@ -225,7 +239,7 @@ void deadline_monotonic (void) {
 }
 
 void earliest_deadline_first (void) {
-    printf(RED ">>>Earliest Deadline First<<<\n" CRESET);
+    printf(RED ">>>Earliest Deadline First (variable priority)<<<\n" CRESET);
     escalonador(earliest_deadline_first_criterion);
 }
 
@@ -305,7 +319,7 @@ void menu_screen (char menu_option[]) {
     printf("----------------------------------------------\n");
     printf("Escolha o Algoritmo de Escalonamento ou <exit> para sair:\n");
     printf("\t- <RM> (Rate Monotonic)\n");
-    printf("\t- <DM> (Deadline Monotonic)\n");
+    //printf("\t- <DM> (Deadline Monotonic)\n");
     printf("\t- <EDF> (Earliest Deadline First)\n");
     printf("\t- <exit> (Sair do programa)\n");
     printf("--> ");
@@ -340,7 +354,7 @@ int main(int argc, char *argv[]) {
             rate_monotonic();
             print_system_execution_time_table();
         } else
-        if (!strcmp(menu_option, "DM")) {
+        /*if (!strcmp(menu_option, "DM")) {
             system("clear");
             printf("%s\n", argv[1]);
             print_system_matrix();
@@ -348,7 +362,7 @@ int main(int argc, char *argv[]) {
 
             deadline_monotonic();
             print_system_execution_time_table();
-        } else
+        } else*/
         if (!strcmp(menu_option, "EDF")){
             system("clear");
             printf("%s\n", argv[1]);
