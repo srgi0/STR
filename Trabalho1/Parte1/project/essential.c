@@ -102,20 +102,22 @@ int lcm (const int numbers[], int n) {
     int numbers_cp[n];
     array_copy(numbers, numbers_cp, n);
 
-    int primo[6] = {2,3,5,7,11,13};
+    int primo[25] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97};
+    int primo_size = 25;
 
     int lcm = 1;
 
-    for (int aux=0 ; aux < 6; aux++) {
+    for (int aux=0 ; aux < primo_size && !array_all_one(numbers_cp, n) ; aux++) {
         for (int i=0 ; i<n && !array_all_one(numbers_cp, n) ; i++) {
-            if ((numbers_cp[i] % primo[aux] == 0)) {
+            if ((numbers_cp[i] % primo[aux]) == 0) {
                 lcm *= primo[aux];
                 array_divide(numbers_cp, primo[aux], n);
+
                 aux = -1;
             }
         }
-
     }
+
     return lcm;
 }
 

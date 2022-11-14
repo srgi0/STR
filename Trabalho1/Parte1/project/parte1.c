@@ -35,6 +35,7 @@ struct system {
     int period_time;
     int number_of_periods;
     int total_execution_time;
+    int execution_time_table_size_type;
     
     char execution_time_table[MAX_N_TASKS][MAX_EXECUTION_TIME];
 
@@ -93,7 +94,10 @@ void print_system_execution_time_table () {
                 printf(notask_color "%c" CRESET, System.execution_time_table[i][t]);
             printf("|");
         }
-        printf(period_color "|" CRESET);
+
+        if (! (System.total_execution_time % System.tasks.p[i]))
+            printf(period_color);
+        printf("|" CRESET);
         printf("]\n");
     }
 
@@ -293,10 +297,16 @@ void system_init(char system_file_name[]) {
     n_tasks = read_file(system_file_path);
 
 
-    //System.total_execution_time = lcm(System.tasks.p, n_tasks);
-    System.period_time = array_max(System.tasks.d, n_tasks);
-    System.number_of_periods = 1;
-    System.total_execution_time = System.number_of_periods*System.period_time;
+    System.period_time = lcm(System.tasks.p, n_tasks);
+    printf("Execution Time Table size [system period (0) | larger task period (1)]: ");
+    scanf("%d", &System.execution_time_table_size_type);
+    if (System.execution_time_table_size_type)
+        System.total_execution_time = array_max(System.tasks.p, n_tasks);
+    else{
+        System.number_of_periods = 1;
+        System.total_execution_time = System.number_of_periods*System.period_time;
+    }
+    printf("%d\n", System.period_time);
     
     printf("%s\n", system_file_name);
     print_system_matrix();
