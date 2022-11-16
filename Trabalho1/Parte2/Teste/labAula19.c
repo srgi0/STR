@@ -19,6 +19,18 @@ int medicao_completa = 0;
 
 void thread_mostra_status (void){
 	double t, h, ta, ti, no, trefe, nrefe;
+	
+	
+	
+	printf("Digite a temperatura de referencia desejada: ");
+	scanf("%lf", &trefe);
+    ref_putT(trefe);
+        
+	
+	printf("Digite o Nivel de referencia desejada: ");
+	scanf("%lf", &nrefe);
+    ref_putN(nrefe);
+	
 	while(1){
 		t = sensor_get("t");
 		h = sensor_get("h");
@@ -40,8 +52,6 @@ void thread_mostra_status (void){
 		printf(".............................................................\n");
 		printf("Temperatura de referencia       (Tref)-->\t%.2lf\n", trefe);
 		printf("Nivel de referencia             (Nref)-->\t%.2lf\n", nrefe);
-		printf(".............................................................\n");
-		printf("Digite [Tref | Nref]: \n");
 		printf(".............................................................\n");
 		printf("Medicao completa: %d\n", medicao_completa);
 		printf("-------------------------------------------------------------\n");
@@ -359,6 +369,10 @@ void thread_grava_H_T(void){
 }
 
 int main( int argc, char *argv[]) {
+	
+	
+	
+	
 	cria_socket(argv[1], atoi(argv[2]) );
     
 	pthread_t t1, t2, t3, t4, t5, t6, t7, t8;
